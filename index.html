@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -853,6 +853,17 @@
                 required
               />
             </div>
+            <script>
+              if ("serviceWorker" in navigator) {
+                navigator.serviceWorker
+                  .getRegistrations()
+                  .then(function (registrations) {
+                    for (let registration of registrations) {
+                      registration.unregister();
+                    }
+                  });
+              }
+            </script>
             <div class="form-group">
               <label class="form-label">Date</label>
               <input type="date" class="form-input" id="expDate" required />

@@ -3031,4 +3031,21 @@ input[type="number"]::-webkit-inner-spin-button {
   .import-stats {
     grid-template-columns: 1fr 1fr;
   }
+  .tx-item {
+    overflow: hidden;
+    max-width: 100%;
+  }
+  .tx-details {
+    min-width: 0;
+  }
+  .tx-desc {
+    white-space: normal !important;
+    word-wrap: break-word;
+  }
+  .tx-amount {
+    white-space: normal !important;
+    word-break: break-all;
+    max-width: 30%;
+    text-align: right;
+  }
 }

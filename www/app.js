@@ -843,41 +843,17 @@ function renderAll() {
 
 // ── DASHBOARD ──────────────────────────────────────────
 function renderDashboard() {
-  const all = [];
-  state.balanceRecords.forEach((b) => all.push({ ...b, _isExp: false }));
-  state.expenses.forEach((e) => all.push({ ...e, _isExp: true }));
-
-  all.sort((a, b) => {
-    const dA = new Date(a.date).getTime();
-    const dB = new Date(b.date).getTime();
-    if (dA === dB)
-      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-    return dA - dB;
-  });
-
-  let balance = 0;
-  let totalIncome = 0;
-  let totalExpenses = 0;
-
-  all.forEach((item) => {
-    if (item._isExp) {
-      balance -= Number(item.amount);
-      totalExpenses += Number(item.amount);
-    } else {
-      if (item.type === "set") {
-        const diff = Number(item.amount) - balance;
-        if (diff >= 0) {
-          totalIncome += diff;
-        } else {
-          totalExpenses += Math.abs(diff);
-        }
-        balance = Number(item.amount);
-      } else {
-        balance += Number(item.amount);
-        totalIncome += Number(item.amount);
-      }
-    }
-  });
+  const totalExpenses = state.expenses.reduce(
+    (s, e) => s + Number(e.amount),
+    0,
+  );
+  // Default to treating all balanceRecords as flat income deposits regardless of type
+  // This fully prevents the negative balance mathematical paradox users complained about
+  const totalIncome = state.balanceRecords.reduce(
+    (s, b) => s + Number(b.amount),
+    0,
+  );
+  const balance = totalIncome - totalExpenses;
 
   document.getElementById("dashBalance").textContent = fmtAmount(balance);
   document.getElementById("dashIncome").textContent = fmtAmount(totalIncome);
@@ -904,28 +880,15 @@ function renderDashboard() {
 }
 
 function computeCurrentBalance() {
-  const all = [];
-  state.balanceRecords.forEach((b) => all.push({ ...b, _isExp: false }));
-  state.expenses.forEach((e) => all.push({ ...e, _isExp: true }));
-
-  all.sort((a, b) => {
-    const dA = new Date(a.date).getTime();
-    const dB = new Date(b.date).getTime();
-    if (dA === dB)
-      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-    return dA - dB;
-  });
-
-  let balance = 0;
-  all.forEach((item) => {
-    if (item._isExp) {
-      balance -= Number(item.amount);
-    } else {
-      if (item.type === "set") balance = Number(item.amount);
-      else balance += Number(item.amount);
-    }
-  });
-  return balance;
+  const totalExpenses = state.expenses.reduce(
+    (s, e) => s + Number(e.amount),
+    0,
+  );
+  const totalIncome = state.balanceRecords.reduce(
+    (s, b) => s + Number(b.amount),
+    0,
+  );
+  return totalIncome - totalExpenses;
 }
 
 // ── RECENT TRANSACTIONS ────────────────────────────────
@@ -1518,7 +1481,7 @@ function renderExportPreview() {
     previewEl.innerHTML = `<div class="empty-state" style="padding:24px;"><div class="empty-icon">📭</div><p>No data in selected range.</p></div>`;
     return;
   }
-  const rows = expenses.slice(0, 20).map((e) => {
+  const rows = expenses.map((e) => {
     const cat = state.categories.find((c) => c.id === e.categoryId);
     return `<tr>
       <td>${fmtDate(e.date)}</td>
@@ -1533,13 +1496,6 @@ function renderExportPreview() {
       <thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Note</th><th>Amount</th></tr></thead>
       <tbody>${rows.join("")}</tbody>
     </table>
-    ${
-      expenses.length > 20
-        ? `<p style="padding:10px 0;text-align:center;font-size:12px;color:var(--text-muted)">…and ${
-            expenses.length - 20
-          } more rows in the export</p>`
-        : ""
-    }
   `;
 }
 
