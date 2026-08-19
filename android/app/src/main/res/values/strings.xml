@@ -4,4 +4,5 @@
     <string name="title_activity_main">SpendWise</string>
     <string name="package_name">io.spendwise.app</string>
     <string name="custom_url_scheme">io.spendwise.app</string>
+    <string name="default_web_client_id">724764110783-us9gc3ogtt68au7p41muhoi0jco5s2c8.apps.googleusercontent.com</string>
 </resources>
