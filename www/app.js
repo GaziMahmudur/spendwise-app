@@ -753,8 +753,15 @@ function loadState() {
   state.categories = state.categories || [];
   state.balanceRecords = state.balanceRecords || [];
 }
+let _autoBackupTimer = null;
 function saveState() {
   localStorage.setItem(STATE_KEY, JSON.stringify(state));
+  if (typeof pushToCloud === "function") {
+    clearTimeout(_autoBackupTimer);
+    _autoBackupTimer = setTimeout(() => {
+      pushToCloud(state, true);
+    }, 1500); // Wait 1.5 seconds after last change before syncing
+  }
 }
 
 // ── NAVIGATION ─────────────────────────────────────────
