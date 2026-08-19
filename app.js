@@ -127,7 +127,9 @@ class DatePicker {
         <span class="dp-month-label">${MONTHS[m]} ${y}</span>
         <button class="dp-nav-btn" id="dpNext">&#8250;</button>
       </div>
-      <div class="dp-weekdays">${DAYS.map((d) => `<span class="dp-wd">${d}</span>`).join("")}</div>
+      <div class="dp-weekdays">${DAYS.map(
+        (d) => `<span class="dp-wd">${d}</span>`,
+      ).join("")}</div>
       <div class="dp-days">${dayCells}</div>
       <div class="dp-footer">
         <button class="dp-footer-btn dp-clear-btn">Clear</button>
@@ -306,10 +308,16 @@ class CustomSelect {
     this.dropdown.innerHTML = cats
       .map((cat) => {
         const isSel = curVal === cat.id;
-        return `<button type="button" class="cs-option${isSel ? " selected" : ""}" data-val="${cat.id}"
+        return `<button type="button" class="cs-option${
+          isSel ? " selected" : ""
+        }" data-val="${cat.id}"
           role="option" aria-selected="${isSel}">
-        <span class="cs-option-icon" style="background:${cat.color}22;">${cat.icon}</span>
-        <span class="cs-option-name" style="color:${cat.color}">${escHtml(cat.name)}</span>
+        <span class="cs-option-icon" style="background:${cat.color}22;">${
+          cat.icon
+        }</span>
+        <span class="cs-option-name" style="color:${cat.color}">${escHtml(
+          cat.name,
+        )}</span>
         <span class="cs-option-check">✓</span>
       </button>`;
       })
@@ -330,8 +338,12 @@ class CustomSelect {
     const cat = state.categories.find((c) => c.id === val);
     if (cat) {
       this.trigger.innerHTML = `
-        <span class="cs-trigger-icon" style="background:${cat.color}22;">${cat.icon}</span>
-        <span class="cs-trigger-label" style="color:${cat.color}">${escHtml(cat.name)}</span>`;
+        <span class="cs-trigger-icon" style="background:${cat.color}22;">${
+        cat.icon
+      }</span>
+        <span class="cs-trigger-label" style="color:${cat.color}">${escHtml(
+        cat.name,
+      )}</span>`;
     } else {
       this.trigger.innerHTML = `<span class="cs-trigger-label cs-placeholder">Select a category…</span>`;
     }
@@ -469,7 +481,9 @@ class GenericCustomSelect {
           ? `<span class="gcs-option-emoji">${em[0].trim()}</span>`
           : "";
         const label = em ? opt.text.slice(em[0].length) : opt.text;
-        return `<button type="button" class="gcs-option${isSel ? " selected" : ""}" data-val="${opt.value}">
+        return `<button type="button" class="gcs-option${
+          isSel ? " selected" : ""
+        }" data-val="${opt.value}">
         ${emoji}<span class="gcs-option-text">${escHtml(label)}</span>
         <span class="gcs-radio"></span>
       </button>`;
@@ -495,7 +509,9 @@ class GenericCustomSelect {
     // Strip leading emoji from trigger label for cleanliness
     const emojiRx = /^([\u{1F300}-\u{1FAFF}][\uFE0F]?|[\u2600}-\u{26FF}])\s*/u;
     const clean = text.replace(emojiRx, "").trim();
-    this.trigger.innerHTML = `<span class="gcs-trigger-label">${escHtml(clean || text)}</span>`;
+    this.trigger.innerHTML = `<span class="gcs-trigger-label">${escHtml(
+      clean || text,
+    )}</span>`;
   }
 
   setValue(val) {
@@ -654,7 +670,9 @@ function buildQcatPickers() {
   if (colorEl) {
     colorEl.innerHTML = PRESET_COLORS.map(
       (c) =>
-        `<button type="button" class="qcat-color-btn${c === qcatSelectedColor ? " selected" : ""}" data-c="${c}" style="background:${c};"></button>`,
+        `<button type="button" class="qcat-color-btn${
+          c === qcatSelectedColor ? " selected" : ""
+        }" data-c="${c}" style="background:${c};"></button>`,
     ).join("");
     colorEl.querySelectorAll(".qcat-color-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
@@ -865,15 +883,17 @@ function renderDashboard() {
   document.getElementById("dashIncome").textContent = fmtAmount(totalIncome);
   document.getElementById("dashExpenses").textContent =
     fmtAmount(totalExpenses);
-  document.getElementById("dashExpenseCount").textContent =
-    `${state.expenses.length} transaction${state.expenses.length !== 1 ? "s" : ""}`;
+  document.getElementById("dashExpenseCount").textContent = `${
+    state.expenses.length
+  } transaction${state.expenses.length !== 1 ? "s" : ""}`;
 
   if (state.balanceRecords.length > 0) {
     const latest = [...state.balanceRecords]
       .sort((a, b) => new Date(a.date) - new Date(b.date))
       .pop();
-    document.getElementById("dashBalanceDate").textContent =
-      `As of ${fmtDate(latest.date)}`;
+    document.getElementById("dashBalanceDate").textContent = `As of ${fmtDate(
+      latest.date,
+    )}`;
   } else {
     document.getElementById("dashBalanceDate").textContent = "As of today";
   }
@@ -932,12 +952,18 @@ function txItemHTML(expense, compact = false) {
       <div class="tx-icon" style="background:${cat.color}22;">${cat.icon}</div>
       <div class="tx-details">
         <div class="tx-desc">${escHtml(expense.desc)}</div>
-        <div class="tx-meta">${escHtml(cat.name)} · ${fmtDate(expense.date)}${expense.note ? " · " + escHtml(expense.note) : ""}</div>
+        <div class="tx-meta">${escHtml(cat.name)} · ${fmtDate(expense.date)}${
+    expense.note ? " · " + escHtml(expense.note) : ""
+  }</div>
       </div>
       <div class="tx-amount">−${fmtAmount(expense.amount)}</div>
       <div class="tx-actions">
-        <button class="tx-action-btn" title="Edit" onclick="editExpense('${expense.id}')">✏️</button>
-        <button class="tx-action-btn" title="Delete" onclick="promptDeleteExpense('${expense.id}')">🗑️</button>
+        <button class="tx-action-btn" title="Edit" onclick="editExpense('${
+          expense.id
+        }')">✏️</button>
+        <button class="tx-action-btn" title="Delete" onclick="promptDeleteExpense('${
+          expense.id
+        }')">🗑️</button>
       </div>
     </div>`;
 }
@@ -1134,7 +1160,9 @@ function populateCategoryFilter() {
     state.categories
       .map(
         (c) =>
-          `<option value="${c.id}">${escHtml(c.icon)} ${escHtml(c.name)}</option>`,
+          `<option value="${c.id}">${escHtml(c.icon)} ${escHtml(
+            c.name,
+          )}</option>`,
       )
       .join("");
   sel.value = cur;
@@ -1293,7 +1321,9 @@ function buildColorGrid() {
   const el = document.getElementById("colorGrid");
   el.innerHTML = PRESET_COLORS.map(
     (c) =>
-      `<button type="button" class="color-btn ${c === selectedColor ? "selected" : ""}" style="background:${c};" onclick="selectColor('${c}')"></button>`,
+      `<button type="button" class="color-btn ${
+        c === selectedColor ? "selected" : ""
+      }" style="background:${c};" onclick="selectColor('${c}')"></button>`,
   ).join("");
 }
 function selectEmoji(e) {
@@ -1344,10 +1374,16 @@ function renderCategories() {
       const total = state.expenses
         .filter((e) => e.categoryId === cat.id)
         .reduce((s, e) => s + Number(e.amount), 0);
-      return `<div class="cat-card" style="background:${cat.color}18; border-color:${cat.color}44;">
-      <button class="cat-delete" onclick="promptDeleteCategory('${cat.id}')" title="Delete">🗑️</button>
+      return `<div class="cat-card" style="background:${
+        cat.color
+      }18; border-color:${cat.color}44;">
+      <button class="cat-delete" onclick="promptDeleteCategory('${
+        cat.id
+      }')" title="Delete">🗑️</button>
       <div class="cat-icon">${cat.icon}</div>
-      <div class="cat-name" style="color:${cat.color}">${escHtml(cat.name)}</div>
+      <div class="cat-name" style="color:${cat.color}">${escHtml(
+        cat.name,
+      )}</div>
       <div class="cat-count">${count} expense${count !== 1 ? "s" : ""}</div>
       ${total > 0 ? `<div class="cat-count">${fmtAmount(total)}</div>` : ""}
     </div>`;
@@ -1416,11 +1452,17 @@ function renderBalanceHistory() {
     <div class="balance-item">
       <div class="bal-info">
         <div class="bal-amount">${fmtAmount(b.amount)}</div>
-        <div class="bal-meta">${fmtDate(b.date)}${b.note ? " · " + escHtml(b.note) : ""}</div>
+        <div class="bal-meta">${fmtDate(b.date)}${
+        b.note ? " · " + escHtml(b.note) : ""
+      }</div>
       </div>
-      <div class="bal-badge ${b.type === "add" ? "add" : ""}">${b.type === "set" ? "Set" : "Added"}</div>
+      <div class="bal-badge ${b.type === "add" ? "add" : ""}">${
+        b.type === "set" ? "Set" : "Added"
+      }</div>
       <div class="bal-actions">
-        <button class="tx-action-btn" onclick="promptDeleteBalance('${b.id}')" title="Delete">🗑️</button>
+        <button class="tx-action-btn" onclick="promptDeleteBalance('${
+          b.id
+        }')" title="Delete">🗑️</button>
       </div>
     </div>`,
     )
@@ -1457,10 +1499,18 @@ function renderExportPreview() {
 
   const statsEl = document.getElementById("exportStats");
   statsEl.innerHTML = `
-    <div class="stat-mini"><div class="stat-mini-val" style="color:#ef4444">${expenses.length}</div><div class="stat-mini-label">Expenses</div></div>
-    <div class="stat-mini"><div class="stat-mini-val" style="color:#ef4444">${fmtAmount(totalAmt)}</div><div class="stat-mini-label">Total Spent</div></div>
-    <div class="stat-mini"><div class="stat-mini-val" style="color:#10b981">${balances.length}</div><div class="stat-mini-label">Balance Records</div></div>
-    <div class="stat-mini"><div class="stat-mini-val" style="color:#10b981">${fmtAmount(computeCurrentBalance())}</div><div class="stat-mini-label">Current Balance</div></div>
+    <div class="stat-mini"><div class="stat-mini-val" style="color:#ef4444">${
+      expenses.length
+    }</div><div class="stat-mini-label">Expenses</div></div>
+    <div class="stat-mini"><div class="stat-mini-val" style="color:#ef4444">${fmtAmount(
+      totalAmt,
+    )}</div><div class="stat-mini-label">Total Spent</div></div>
+    <div class="stat-mini"><div class="stat-mini-val" style="color:#10b981">${
+      balances.length
+    }</div><div class="stat-mini-label">Balance Records</div></div>
+    <div class="stat-mini"><div class="stat-mini-val" style="color:#10b981">${fmtAmount(
+      computeCurrentBalance(),
+    )}</div><div class="stat-mini-label">Current Balance</div></div>
   `;
 
   const previewEl = document.getElementById("exportPreview");
@@ -1483,7 +1533,13 @@ function renderExportPreview() {
       <thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Note</th><th>Amount</th></tr></thead>
       <tbody>${rows.join("")}</tbody>
     </table>
-    ${expenses.length > 20 ? `<p style="padding:10px 0;text-align:center;font-size:12px;color:var(--text-muted)">…and ${expenses.length - 20} more rows in the export</p>` : ""}
+    ${
+      expenses.length > 20
+        ? `<p style="padding:10px 0;text-align:center;font-size:12px;color:var(--text-muted)">…and ${
+            expenses.length - 20
+          } more rows in the export</p>`
+        : ""
+    }
   `;
 }
 
@@ -1497,10 +1553,15 @@ function exportCSV() {
 
   if (incExp && expenses.length) {
     csv += "EXPENSES\n";
-    csv += "Date,Description,Category,Note,Amount\n";
+    csv +=
+      "Date,Description,Category,Category Icon,Category Color,Note,Amount\n";
     expenses.forEach((e) => {
       const cat = state.categories.find((c) => c.id === e.categoryId);
-      csv += `"${e.date}","${csvEsc(e.desc)}","${cat ? csvEsc(cat.name) : "Uncategorized"}","${csvEsc(e.note || "")}","${Number(e.amount).toFixed(2)}"\n`;
+      csv += `"${e.date}","${csvEsc(e.desc)}","${
+        cat ? csvEsc(cat.name) : "Uncategorized"
+      }","${cat ? csvEsc(cat.icon) : ""}","${
+        cat ? csvEsc(cat.color) : ""
+      }","${csvEsc(e.note || "")}","${Number(e.amount).toFixed(2)}"\n`;
     });
     csv += "\n";
   }
@@ -1509,7 +1570,9 @@ function exportCSV() {
     csv += "BALANCE RECORDS\n";
     csv += "Date,Amount,Type,Note\n";
     balances.forEach((b) => {
-      csv += `"${b.date}","${Number(b.amount).toFixed(2)}","${b.type}","${csvEsc(b.note || "")}"\n`;
+      csv += `"${b.date}","${Number(b.amount).toFixed(2)}","${
+        b.type
+      }","${csvEsc(b.note || "")}"\n`;
     });
     csv += "\n";
   }
@@ -1521,7 +1584,9 @@ function exportCSV() {
       const catExp = expenses.filter((e) => e.categoryId === cat.id);
       const total = catExp.reduce((s, e) => s + Number(e.amount), 0);
       if (catExp.length > 0) {
-        csv += `"${csvEsc(cat.name)}","${catExp.length}","${total.toFixed(2)}"\n`;
+        csv += `"${csvEsc(cat.name)}","${catExp.length}","${total.toFixed(
+          2,
+        )}"\n`;
       }
     });
     csv += `\nCurrent Balance,"","${computeCurrentBalance().toFixed(2)}"\n`;
@@ -1549,6 +1614,7 @@ function exportJSON() {
         ...e,
         categoryName: cat ? cat.name : "Uncategorized",
         categoryIcon: cat ? cat.icon : "💸",
+        categoryColor: cat ? cat.color : "#7c3aed",
       };
     });
   if (incBal) data.balanceRecords = balances;
@@ -1637,7 +1703,12 @@ function exportCopyText() {
   let lines = [];
   lines.push("=== SpendWise Expense Report ===");
   lines.push(
-    `Generated: ${new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}`,
+    `Generated: ${new Date().toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })}`,
   );
   lines.push("");
 
@@ -1649,7 +1720,9 @@ function exportCopyText() {
         const cat = state.categories.find((c) => c.id === e.categoryId);
         const catLabel = cat ? `${cat.icon} ${cat.name}` : "Other";
         lines.push(
-          `  ${e.desc}: ${fmt(e.amount)}  [${catLabel}]${e.note ? "  • " + e.note : ""}`,
+          `  ${e.desc}: ${fmt(e.amount)}  [${catLabel}]${
+            e.note ? "  • " + e.note : ""
+          }`,
         );
       });
       const dayTotal = byDate[date].reduce((s, e) => s + Number(e.amount), 0);
@@ -1903,7 +1976,13 @@ function executeImport() {
     };
     const newExpenses = mergedExpenses.length - state.expenses.length;
     const newBalances = mergedBalances.length - state.balanceRecords.length;
-    mergeMsg = `Merge complete! Added ${Math.max(0, newExpenses)} new expenses and ${Math.max(0, newBalances)} new balance records. Total: ${mergedExpenses.length} expenses.`;
+    mergeMsg = `Merge complete! Added ${Math.max(
+      0,
+      newExpenses,
+    )} new expenses and ${Math.max(
+      0,
+      newBalances,
+    )} new balance records. Total: ${mergedExpenses.length} expenses.`;
   }
 
   // Save and reload

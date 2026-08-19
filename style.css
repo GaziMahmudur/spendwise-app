@@ -878,9 +878,7 @@ body {
   border-radius: var(--radius-sm);
   font-size: 14px;
   outline: none;
-  transition:
-    border var(--transition),
-    box-shadow var(--transition);
+  transition: border var(--transition), box-shadow var(--transition);
   font-family: inherit;
 }
 
@@ -1113,9 +1111,7 @@ body {
   font-size: 14px;
   font-family: inherit;
   outline: none;
-  transition:
-    border var(--transition),
-    box-shadow var(--transition);
+  transition: border var(--transition), box-shadow var(--transition);
 }
 
 select.form-input {
@@ -1154,9 +1150,7 @@ select.form-input option {
 .qcat-panel {
   overflow: hidden;
   max-height: 0;
-  transition:
-    max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-    opacity 0.25s ease;
+  transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
   opacity: 0;
   margin-top: 0;
 }
@@ -1295,9 +1289,7 @@ select.form-input option {
   font-family: inherit;
   cursor: pointer;
   text-align: left;
-  transition:
-    border var(--transition),
-    box-shadow var(--transition);
+  transition: border var(--transition), box-shadow var(--transition);
   display: flex;
   align-items: center;
   gap: 10px;
@@ -1492,9 +1484,7 @@ select.form-input option {
   font-family: inherit;
   cursor: pointer;
   text-align: left;
-  transition:
-    border var(--transition),
-    box-shadow var(--transition);
+  transition: border var(--transition), box-shadow var(--transition);
   display: flex;
   align-items: center;
   gap: 10px;
@@ -1994,8 +1984,7 @@ input[type="number"]::-webkit-inner-spin-button {
 }
 
 .preview-table-wrap {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow-x: hidden;
   max-width: 100%;
 }
 
@@ -2355,6 +2344,39 @@ input[type="number"]::-webkit-inner-spin-button {
     text-overflow: ellipsis;
     max-width: 110px;
     font-size: 12px;
+  }
+
+  /* Force tables to block on mobile for zero horizontal scroll */
+  .preview-table,
+  .preview-table tbody,
+  .preview-table tr,
+  .preview-table td {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .preview-table thead {
+    display: none;
+  }
+  .preview-table tr {
+    padding: 10px 0;
+    border-bottom: 2px solid var(--border);
+  }
+  .preview-table td {
+    padding: 6px 12px;
+    border: none !important;
+  }
+  .preview-table td:nth-child(2) {
+    font-weight: bold;
+    font-size: 14px;
+  }
+  .preview-table td:last-child {
+    text-align: right;
+  }
+
+  html,
+  body {
+    overflow-x: hidden !important;
   }
 }
 
