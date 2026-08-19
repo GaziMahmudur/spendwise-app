@@ -901,34 +901,41 @@ function renderRecentTransactions() {
     el.innerHTML = `<div class="empty-state"><div class="empty-icon">🧾</div><p>No transactions yet.<br/>Add your first expense!</p></div>`;
     return;
   }
-  el.innerHTML = sorted.map((e) => txItemHTML(e, true)).join("");
+  el.innerHTML = `<div class="preview-table-wrap">
+    <table class="preview-table">
+      <thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Note</th><th>Amount</th><th>Actions</th></tr></thead>
+      <tbody>${sorted.map((e) => txItemHTML(e)).join("")}</tbody>
+    </table>
+  </div>`;
 }
 
-function txItemHTML(expense, compact = false) {
+function txItemHTML(expense) {
   const cat = state.categories.find((c) => c.id === expense.categoryId) || {
     icon: "💸",
     name: "Uncategorized",
     color: "#7c3aed",
   };
-  return `
-    <div class="tx-item" id="txitem_${expense.id}">
-      <div class="tx-icon" style="background:${cat.color}22;">${cat.icon}</div>
-      <div class="tx-details">
-        <div class="tx-desc">${escHtml(expense.desc)}</div>
-        <div class="tx-meta">${escHtml(cat.name)} · ${fmtDate(expense.date)}${
-    expense.note ? " · " + escHtml(expense.note) : ""
-  }</div>
-      </div>
-      <div class="tx-amount">−${fmtAmount(expense.amount)}</div>
-      <div class="tx-actions">
-        <button class="tx-action-btn" title="Edit" onclick="editExpense('${
-          expense.id
-        }')">✏️</button>
-        <button class="tx-action-btn" title="Delete" onclick="promptDeleteExpense('${
-          expense.id
-        }')">🗑️</button>
-      </div>
-    </div>`;
+  return `<tr>
+    <td>${fmtDate(expense.date)}</td>
+    <td style="font-weight: 600;">${escHtml(expense.desc)}</td>
+    <td><span style="display:inline-block; padding: 4px 8px; border-radius: 4px; background: ${
+      cat.color
+    }22; color: ${cat.color}; font-size: 11px; font-weight: 700;">${
+    cat.icon
+  } ${escHtml(cat.name)}</span></td>
+    <td>${expense.note ? escHtml(expense.note) : "—"}</td>
+    <td style="text-align: right; font-weight: bold; color: var(--red);">−${fmtAmount(
+      expense.amount,
+    )}</td>
+    <td style="text-align: right; white-space: nowrap;">
+      <button style="background:none;border:none;cursor:pointer;font-size:16px;margin:0 4px;" title="Edit" onclick="editExpense('${
+        expense.id
+      }')">✏️</button>
+      <button style="background:none;border:none;cursor:pointer;font-size:16px;margin:0 4px;" title="Delete" onclick="promptDeleteExpense('${
+        expense.id
+      }')">🗑️</button>
+    </td>
+  </tr>`;
 }
 
 // ── DONUT CHART ────────────────────────────────────────
@@ -1111,7 +1118,12 @@ function filterTransactions() {
     el.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><p>No transactions found.</p></div>`;
     return;
   }
-  el.innerHTML = list.map((e) => txItemHTML(e)).join("");
+  el.innerHTML = `<div class="preview-table-wrap">
+    <table class="preview-table">
+      <thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Note</th><th>Amount</th><th>Actions</th></tr></thead>
+      <tbody>${list.map((e) => txItemHTML(e)).join("")}</tbody>
+    </table>
+  </div>`;
 }
 
 function populateCategoryFilter() {
