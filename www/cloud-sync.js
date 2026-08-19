@@ -200,7 +200,9 @@ async function cloudSignIn() {
         );
       }
 
-      const result = await FirebaseAuthentication.signInWithGoogle();
+      const result = await FirebaseAuthentication.signInWithGoogle({
+        useCredentialManager: false,
+      });
 
       console.log("[SpendWise Cloud] Native Google sign-in result:", result);
 

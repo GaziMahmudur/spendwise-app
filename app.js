@@ -12,7 +12,7 @@ class DatePicker {
 
     // Parse existing value
     if (input.value) {
-      const parts = input.value.split('-');
+      const parts = input.value.split("-");
       this.selected = new Date(+parts[0], +parts[1] - 1, +parts[2]);
       this.viewDate = new Date(this.selected);
     }
@@ -24,44 +24,54 @@ class DatePicker {
 
   _build() {
     // Wrap the native input
-    const wrap = document.createElement('div');
-    wrap.className = 'dp-wrap';
+    const wrap = document.createElement("div");
+    wrap.className = "dp-wrap";
     this.input.parentNode.insertBefore(wrap, this.input);
     wrap.appendChild(this.input);
 
     // Trigger button
-    this.trigger = document.createElement('button');
-    this.trigger.type = 'button';
-    this.trigger.className = 'dp-trigger';
-    this.trigger.setAttribute('aria-haspopup', 'true');
+    this.trigger = document.createElement("button");
+    this.trigger.type = "button";
+    this.trigger.className = "dp-trigger";
+    this.trigger.setAttribute("aria-haspopup", "true");
     wrap.appendChild(this.trigger);
 
     // Calendar panel
-    this.cal = document.createElement('div');
-    this.cal.className = 'dp-calendar';
+    this.cal = document.createElement("div");
+    this.cal.className = "dp-calendar";
     wrap.appendChild(this.cal);
 
-    this.trigger.addEventListener('click', (e) => { e.stopPropagation(); this._toggle(); });
+    this.trigger.addEventListener("click", (e) => {
+      e.stopPropagation();
+      this._toggle();
+    });
     this.wrap = wrap;
   }
 
   _toggle() {
-    if (this.cal.classList.contains('open')) { this._close(); }
-    else { this._open(); }
+    if (this.cal.classList.contains("open")) {
+      this._close();
+    } else {
+      this._open();
+    }
   }
   _open() {
     // Close any other open pickers
-    document.querySelectorAll('.dp-calendar.open').forEach(c => c.classList.remove('open'));
-    document.querySelectorAll('.dp-trigger.open').forEach(t => t.classList.remove('open'));
+    document
+      .querySelectorAll(".dp-calendar.open")
+      .forEach((c) => c.classList.remove("open"));
+    document
+      .querySelectorAll(".dp-trigger.open")
+      .forEach((t) => t.classList.remove("open"));
     this._renderCal();
-    this.cal.classList.add('open');
-    this.trigger.classList.add('open');
-    document.addEventListener('click', this._closeOnOutside);
+    this.cal.classList.add("open");
+    this.trigger.classList.add("open");
+    document.addEventListener("click", this._closeOnOutside);
   }
   _close() {
-    this.cal.classList.remove('open');
-    this.trigger.classList.remove('open');
-    document.removeEventListener('click', this._closeOnOutside);
+    this.cal.classList.remove("open");
+    this.trigger.classList.remove("open");
+    document.removeEventListener("click", this._closeOnOutside);
   }
   _closeOnOutside(e) {
     if (!this.wrap.contains(e.target)) this._close();
@@ -70,9 +80,21 @@ class DatePicker {
   _renderCal() {
     const y = this.viewDate.getFullYear();
     const m = this.viewDate.getMonth();
-    const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'];
-    const DAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+    const MONTHS = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+    const DAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
     const today = new Date();
     const todayStr = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
@@ -85,7 +107,7 @@ class DatePicker {
     const daysInMonth = new Date(y, m + 1, 0).getDate();
 
     // Day cells
-    let dayCells = '';
+    let dayCells = "";
     for (let i = 0; i < firstDay; i++) {
       dayCells += `<button class="dp-day dp-day--empty" disabled></button>`;
     }
@@ -93,9 +115,9 @@ class DatePicker {
       const key = `${y}-${m}-${d}`;
       const isToday = key === todayStr;
       const isSel = key === selStr;
-      let cls = 'dp-day';
-      if (isToday) cls += ' dp-day--today';
-      if (isSel) cls += ' dp-day--selected';
+      let cls = "dp-day";
+      if (isToday) cls += " dp-day--today";
+      if (isSel) cls += " dp-day--selected";
       dayCells += `<button class="${cls}" data-d="${d}">${d}</button>`;
     }
 
@@ -105,7 +127,7 @@ class DatePicker {
         <span class="dp-month-label">${MONTHS[m]} ${y}</span>
         <button class="dp-nav-btn" id="dpNext">&#8250;</button>
       </div>
-      <div class="dp-weekdays">${DAYS.map(d => `<span class="dp-wd">${d}</span>`).join('')}</div>
+      <div class="dp-weekdays">${DAYS.map((d) => `<span class="dp-wd">${d}</span>`).join("")}</div>
       <div class="dp-days">${dayCells}</div>
       <div class="dp-footer">
         <button class="dp-footer-btn dp-clear-btn">Clear</button>
@@ -113,28 +135,28 @@ class DatePicker {
       </div>`;
 
     // Events
-    this.cal.querySelector('#dpPrev').addEventListener('click', (e) => {
+    this.cal.querySelector("#dpPrev").addEventListener("click", (e) => {
       e.stopPropagation();
       this.viewDate.setMonth(this.viewDate.getMonth() - 1);
       this._renderCal();
     });
-    this.cal.querySelector('#dpNext').addEventListener('click', (e) => {
+    this.cal.querySelector("#dpNext").addEventListener("click", (e) => {
       e.stopPropagation();
       this.viewDate.setMonth(this.viewDate.getMonth() + 1);
       this._renderCal();
     });
-    this.cal.querySelector('.dp-clear-btn').addEventListener('click', (e) => {
+    this.cal.querySelector(".dp-clear-btn").addEventListener("click", (e) => {
       e.stopPropagation();
       this.selected = null;
       this._sync();
       this._close();
     });
-    this.cal.querySelector('.dp-today-btn').addEventListener('click', (e) => {
+    this.cal.querySelector(".dp-today-btn").addEventListener("click", (e) => {
       e.stopPropagation();
       this._select(new Date());
     });
-    this.cal.querySelectorAll('.dp-day[data-d]').forEach(btn => {
-      btn.addEventListener('click', (e) => {
+    this.cal.querySelectorAll(".dp-day[data-d]").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
         e.stopPropagation();
         const d = parseInt(btn.dataset.d);
         this._select(new Date(y, m, d));
@@ -148,54 +170,65 @@ class DatePicker {
     this._sync();
     this._close();
     // Fire change event so listeners react
-    this.input.dispatchEvent(new Event('change', { bubbles: true }));
+    this.input.dispatchEvent(new Event("change", { bubbles: true }));
   }
 
   _sync() {
     if (this.selected) {
       const y = this.selected.getFullYear();
-      const m = String(this.selected.getMonth() + 1).padStart(2, '0');
-      const d = String(this.selected.getDate()).padStart(2, '0');
+      const m = String(this.selected.getMonth() + 1).padStart(2, "0");
+      const d = String(this.selected.getDate()).padStart(2, "0");
       this.input.value = `${y}-${m}-${d}`;
-      this.trigger.textContent = this.selected.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-      this.trigger.classList.remove('dp-placeholder');
+      this.trigger.textContent = this.selected.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+      this.trigger.classList.remove("dp-placeholder");
     } else {
-      this.input.value = '';
+      this.input.value = "";
       this.trigger.innerHTML = `<span class="dp-placeholder">Select date…</span>`;
     }
   }
 
   // Public: set value from outside (e.g. when editing an expense)
   setValue(dateStr) {
-    if (!dateStr) { this.selected = null; }
-    else {
-      const parts = dateStr.split('-');
+    if (!dateStr) {
+      this.selected = null;
+    } else {
+      const parts = dateStr.split("-");
       this.selected = new Date(+parts[0], +parts[1] - 1, +parts[2]);
       this.viewDate = new Date(this.selected);
     }
     this._sync();
   }
 
-  getValue() { return this.input.value; }
+  getValue() {
+    return this.input.value;
+  }
 }
 
 // Registry so we can talk to pickers by input id
 const _pickers = {};
 function initDatePickers() {
-  document.querySelectorAll('input[type="date"]').forEach(inp => {
+  document.querySelectorAll('input[type="date"]').forEach((inp) => {
     if (!inp.dataset.dpInit) {
-      inp.dataset.dpInit = '1';
+      inp.dataset.dpInit = "1";
       _pickers[inp.id] = new DatePicker(inp);
     }
   });
 }
 function dpSetValue(inputId, dateStr) {
   if (_pickers[inputId]) _pickers[inputId].setValue(dateStr);
-  else { const el = document.getElementById(inputId); if (el) el.value = dateStr; }
+  else {
+    const el = document.getElementById(inputId);
+    if (el) el.value = dateStr;
+  }
 }
 function dpGetValue(inputId) {
   if (_pickers[inputId]) return _pickers[inputId].getValue();
-  const el = document.getElementById(inputId); return el ? el.value : '';
+  const el = document.getElementById(inputId);
+  return el ? el.value : "";
 }
 
 // ── CUSTOM SELECT ─────────────────────────────────────
@@ -207,46 +240,56 @@ class CustomSelect {
   }
 
   _build() {
-    const wrap = document.createElement('div');
-    wrap.className = 'cs-wrap';
+    const wrap = document.createElement("div");
+    wrap.className = "cs-wrap";
     this.select.parentNode.insertBefore(wrap, this.select);
     wrap.appendChild(this.select);
 
     // Trigger
-    this.trigger = document.createElement('button');
-    this.trigger.type = 'button';
-    this.trigger.className = 'cs-trigger';
-    this.trigger.setAttribute('aria-haspopup', 'listbox');
+    this.trigger = document.createElement("button");
+    this.trigger.type = "button";
+    this.trigger.className = "cs-trigger";
+    this.trigger.setAttribute("aria-haspopup", "listbox");
     wrap.appendChild(this.trigger);
 
     // Dropdown panel
-    this.dropdown = document.createElement('div');
-    this.dropdown.className = 'cs-dropdown';
-    this.dropdown.setAttribute('role', 'listbox');
+    this.dropdown = document.createElement("div");
+    this.dropdown.className = "cs-dropdown";
+    this.dropdown.setAttribute("role", "listbox");
     wrap.appendChild(this.dropdown);
 
     this.wrap = wrap;
-    this.trigger.addEventListener('click', (e) => { e.stopPropagation(); this._toggle(); });
+    this.trigger.addEventListener("click", (e) => {
+      e.stopPropagation();
+      this._toggle();
+    });
     this._syncTrigger();
   }
 
   _toggle() {
-    if (this.dropdown.classList.contains('open')) { this._close(); }
-    else { this._open(); }
+    if (this.dropdown.classList.contains("open")) {
+      this._close();
+    } else {
+      this._open();
+    }
   }
   _open() {
     // Close other open custom selects
-    document.querySelectorAll('.cs-dropdown.open').forEach(d => d.classList.remove('open'));
-    document.querySelectorAll('.cs-trigger.open').forEach(t => t.classList.remove('open'));
+    document
+      .querySelectorAll(".cs-dropdown.open")
+      .forEach((d) => d.classList.remove("open"));
+    document
+      .querySelectorAll(".cs-trigger.open")
+      .forEach((t) => t.classList.remove("open"));
     this._renderOptions();
-    this.dropdown.classList.add('open');
-    this.trigger.classList.add('open');
-    document.addEventListener('click', this._closeOnOutside);
+    this.dropdown.classList.add("open");
+    this.trigger.classList.add("open");
+    document.addEventListener("click", this._closeOnOutside);
   }
   _close() {
-    this.dropdown.classList.remove('open');
-    this.trigger.classList.remove('open');
-    document.removeEventListener('click', this._closeOnOutside);
+    this.dropdown.classList.remove("open");
+    this.trigger.classList.remove("open");
+    document.removeEventListener("click", this._closeOnOutside);
   }
   _closeOnOutside(e) {
     if (!this.wrap.contains(e.target)) this._close();
@@ -260,29 +303,31 @@ class CustomSelect {
       this.dropdown.innerHTML = `<div class="cs-empty">No categories yet. Create one first!</div>`;
       return;
     }
-    this.dropdown.innerHTML = cats.map(cat => {
-      const isSel = curVal === cat.id;
-      return `<button type="button" class="cs-option${isSel ? ' selected' : ''}" data-val="${cat.id}"
+    this.dropdown.innerHTML = cats
+      .map((cat) => {
+        const isSel = curVal === cat.id;
+        return `<button type="button" class="cs-option${isSel ? " selected" : ""}" data-val="${cat.id}"
           role="option" aria-selected="${isSel}">
         <span class="cs-option-icon" style="background:${cat.color}22;">${cat.icon}</span>
         <span class="cs-option-name" style="color:${cat.color}">${escHtml(cat.name)}</span>
         <span class="cs-option-check">✓</span>
       </button>`;
-    }).join('');
+      })
+      .join("");
 
-    this.dropdown.querySelectorAll('.cs-option').forEach(btn => {
-      btn.addEventListener('click', (e) => {
+    this.dropdown.querySelectorAll(".cs-option").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
         e.stopPropagation();
         this.setValue(btn.dataset.val);
         this._close();
-        this.select.dispatchEvent(new Event('change', { bubbles: true }));
+        this.select.dispatchEvent(new Event("change", { bubbles: true }));
       });
     });
   }
 
   _syncTrigger() {
     const val = this.select.value;
-    const cat = state.categories.find(c => c.id === val);
+    const cat = state.categories.find((c) => c.id === val);
     if (cat) {
       this.trigger.innerHTML = `
         <span class="cs-trigger-icon" style="background:${cat.color}22;">${cat.icon}</span>
@@ -297,14 +342,22 @@ class CustomSelect {
     this._syncTrigger();
   }
 
-  getValue() { return this.select.value; }
+  getValue() {
+    return this.select.value;
+  }
 
   // Rebuild the native select options then re-sync trigger
   refreshOptions(categories) {
     const prev = this.select.value;
-    this.select.innerHTML = '<option value="">Select a category</option>' +
-      categories.map(c => `<option value="${c.id}">${c.icon} ${escHtml(c.name)}</option>`).join('');
-    if (prev && categories.find(c => c.id === prev)) {
+    this.select.innerHTML =
+      '<option value="">Select a category</option>' +
+      categories
+        .map(
+          (c) =>
+            `<option value="${c.id}">${c.icon} ${escHtml(c.name)}</option>`,
+        )
+        .join("");
+    if (prev && categories.find((c) => c.id === prev)) {
       this.select.value = prev;
     }
     this._syncTrigger();
@@ -313,20 +366,24 @@ class CustomSelect {
 
 const _cSelects = {};
 function initCustomSelects() {
-  document.querySelectorAll('select.form-input').forEach(sel => {
+  document.querySelectorAll("select.form-input").forEach((sel) => {
     if (!sel.dataset.csInit) {
-      sel.dataset.csInit = '1';
+      sel.dataset.csInit = "1";
       _cSelects[sel.id] = new CustomSelect(sel);
     }
   });
 }
 function csSetValue(selectId, val) {
   if (_cSelects[selectId]) _cSelects[selectId].setValue(val);
-  else { const el = document.getElementById(selectId); if (el) el.value = val; }
+  else {
+    const el = document.getElementById(selectId);
+    if (el) el.value = val;
+  }
 }
 function csGetValue(selectId) {
   if (_cSelects[selectId]) return _cSelects[selectId].getValue();
-  const el = document.getElementById(selectId); return el ? el.value : '';
+  const el = document.getElementById(selectId);
+  return el ? el.value : "";
 }
 function csRefresh(selectId, categories) {
   if (_cSelects[selectId]) _cSelects[selectId].refreshOptions(categories);
@@ -341,43 +398,54 @@ class GenericCustomSelect {
   }
 
   _build() {
-    const wrap = document.createElement('div');
-    wrap.className = 'gcs-wrap';
+    const wrap = document.createElement("div");
+    wrap.className = "gcs-wrap";
     this.select.parentNode.insertBefore(wrap, this.select);
     wrap.appendChild(this.select);
     // Hide native select
-    this.select.style.cssText = 'position:absolute;opacity:0;pointer-events:none;width:0;height:0;';
+    this.select.style.cssText =
+      "position:absolute;opacity:0;pointer-events:none;width:0;height:0;";
 
-    this.trigger = document.createElement('button');
-    this.trigger.type = 'button';
-    this.trigger.className = 'gcs-trigger';
+    this.trigger = document.createElement("button");
+    this.trigger.type = "button";
+    this.trigger.className = "gcs-trigger";
     wrap.appendChild(this.trigger);
 
-    this.dropdown = document.createElement('div');
-    this.dropdown.className = 'gcs-dropdown';
+    this.dropdown = document.createElement("div");
+    this.dropdown.className = "gcs-dropdown";
     wrap.appendChild(this.dropdown);
 
     this.wrap = wrap;
-    this.trigger.addEventListener('click', (e) => { e.stopPropagation(); this._toggle(); });
+    this.trigger.addEventListener("click", (e) => {
+      e.stopPropagation();
+      this._toggle();
+    });
     this._syncTrigger();
   }
 
   _toggle() {
-    if (this.dropdown.classList.contains('open')) { this._close(); }
-    else { this._open(); }
+    if (this.dropdown.classList.contains("open")) {
+      this._close();
+    } else {
+      this._open();
+    }
   }
   _open() {
-    document.querySelectorAll('.gcs-dropdown.open,.cs-dropdown.open').forEach(d => d.classList.remove('open'));
-    document.querySelectorAll('.gcs-trigger.open,.cs-trigger.open').forEach(t => t.classList.remove('open'));
+    document
+      .querySelectorAll(".gcs-dropdown.open,.cs-dropdown.open")
+      .forEach((d) => d.classList.remove("open"));
+    document
+      .querySelectorAll(".gcs-trigger.open,.cs-trigger.open")
+      .forEach((t) => t.classList.remove("open"));
     this._renderOptions();
-    this.dropdown.classList.add('open');
-    this.trigger.classList.add('open');
-    document.addEventListener('click', this._closeOnOutside);
+    this.dropdown.classList.add("open");
+    this.trigger.classList.add("open");
+    document.addEventListener("click", this._closeOnOutside);
   }
   _close() {
-    this.dropdown.classList.remove('open');
-    this.trigger.classList.remove('open');
-    document.removeEventListener('click', this._closeOnOutside);
+    this.dropdown.classList.remove("open");
+    this.trigger.classList.remove("open");
+    document.removeEventListener("click", this._closeOnOutside);
   }
   _closeOnOutside(e) {
     if (!this.wrap.contains(e.target)) this._close();
@@ -390,49 +458,64 @@ class GenericCustomSelect {
       this.dropdown.innerHTML = `<div class="gcs-empty">No options</div>`;
       return;
     }
-    this.dropdown.innerHTML = options.map(opt => {
-      const isSel = opt.value === curVal;
-      // Extract leading emoji if present (category labels contain emoji)
-      const emojiRx = /^([\u{1F300}-\u{1FAFF}][\uFE0F]?|[\u2600}-\u{26FF}])\s*/u;
-      const em = opt.text.match(emojiRx);
-      const emoji = em ? `<span class="gcs-option-emoji">${em[0].trim()}</span>` : '';
-      const label = em ? opt.text.slice(em[0].length) : opt.text;
-      return `<button type="button" class="gcs-option${isSel ? ' selected' : ''}" data-val="${opt.value}">
+    this.dropdown.innerHTML = options
+      .map((opt) => {
+        const isSel = opt.value === curVal;
+        // Extract leading emoji if present (category labels contain emoji)
+        const emojiRx =
+          /^([\u{1F300}-\u{1FAFF}][\uFE0F]?|[\u2600}-\u{26FF}])\s*/u;
+        const em = opt.text.match(emojiRx);
+        const emoji = em
+          ? `<span class="gcs-option-emoji">${em[0].trim()}</span>`
+          : "";
+        const label = em ? opt.text.slice(em[0].length) : opt.text;
+        return `<button type="button" class="gcs-option${isSel ? " selected" : ""}" data-val="${opt.value}">
         ${emoji}<span class="gcs-option-text">${escHtml(label)}</span>
         <span class="gcs-radio"></span>
       </button>`;
-    }).join('');
+      })
+      .join("");
 
-    this.dropdown.querySelectorAll('.gcs-option').forEach(btn => {
-      btn.addEventListener('click', (e) => {
+    this.dropdown.querySelectorAll(".gcs-option").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
         e.stopPropagation();
         this.setValue(btn.dataset.val);
         this._close();
-        this.select.dispatchEvent(new Event('change', { bubbles: true }));
+        this.select.dispatchEvent(new Event("change", { bubbles: true }));
       });
     });
   }
 
   _syncTrigger() {
     const val = this.select.value;
-    const opt = Array.from(this.select.options).find(o => o.value === val) || this.select.options[0];
-    const text = opt ? opt.text : 'Select…';
+    const opt =
+      Array.from(this.select.options).find((o) => o.value === val) ||
+      this.select.options[0];
+    const text = opt ? opt.text : "Select…";
     // Strip leading emoji from trigger label for cleanliness
     const emojiRx = /^([\u{1F300}-\u{1FAFF}][\uFE0F]?|[\u2600}-\u{26FF}])\s*/u;
-    const clean = text.replace(emojiRx, '').trim();
+    const clean = text.replace(emojiRx, "").trim();
     this.trigger.innerHTML = `<span class="gcs-trigger-label">${escHtml(clean || text)}</span>`;
   }
 
-  setValue(val) { this.select.value = val; this._syncTrigger(); }
-  getValue() { return this.select.value; }
-  refresh() { this._syncTrigger(); if (this.dropdown.classList.contains('open')) this._renderOptions(); }
+  setValue(val) {
+    this.select.value = val;
+    this._syncTrigger();
+  }
+  getValue() {
+    return this.select.value;
+  }
+  refresh() {
+    this._syncTrigger();
+    if (this.dropdown.classList.contains("open")) this._renderOptions();
+  }
 }
 
 const _gSelects = {};
 function initGenericCustomSelects() {
-  document.querySelectorAll('.filter-select, .period-select').forEach(sel => {
+  document.querySelectorAll(".filter-select, .period-select").forEach((sel) => {
     if (!sel.dataset.gcsInit) {
-      sel.dataset.gcsInit = '1';
+      sel.dataset.gcsInit = "1";
       _gSelects[sel.id] = new GenericCustomSelect(sel);
     }
   });
@@ -441,13 +524,12 @@ function gcsRefresh(selectId) {
   if (_gSelects[selectId]) _gSelects[selectId].refresh();
 }
 
-
 const STATE_KEY = "spendwise_v2";
 let state = {
   expenses: [],
   categories: [],
   balanceRecords: [],
-  currency: 'taka',
+  currency: "taka",
 };
 
 // ── DEFAULT CATEGORIES ─────────────────────────────────
@@ -497,20 +579,20 @@ const PRESET_COLORS = [
   "#14b8a6",
 ];
 
-let selectedEmoji = '';
+let selectedEmoji = "";
 let selectedColor = PRESET_COLORS[0];
 let deleteTarget = null;
-let currentPage = 'dashboard';
+let currentPage = "dashboard";
 
 // Quick-category creator state
-let qcatSelectedEmoji = '';
+let qcatSelectedEmoji = "";
 let qcatSelectedColor = PRESET_COLORS[0];
 
 // ── INIT ───────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
   loadState();
   if (state.categories.length === 0) {
-    state.categories = DEFAULT_CATEGORIES.map(c => ({ ...c }));
+    state.categories = DEFAULT_CATEGORIES.map((c) => ({ ...c }));
     saveState();
   }
   initDatePickers();
@@ -524,85 +606,102 @@ document.addEventListener('DOMContentLoaded', () => {
   initGenericCustomSelects();
   initImportDropzone();
   // Load currency setting into input
-  const cu = document.getElementById('currencyUnit');
-  if (cu) cu.value = state.currency || 'taka';
+  const cu = document.getElementById("currencyUnit");
+  if (cu) cu.value = state.currency || "taka";
 });
 
 // ── CURRENCY UNIT ───────────────────────────────────
 function saveCurrencyUnit() {
-  const val = (document.getElementById('currencyUnit')?.value || 'taka').trim() || 'taka';
+  const val =
+    (document.getElementById("currencyUnit")?.value || "taka").trim() || "taka";
   state.currency = val;
   saveState();
   renderAll(); // refresh preview amounts and dashboard amounts everywhere
 }
 function fmtCur(n) {
-  const sym = state.currency || 'taka';
-  const num = Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const sym = state.currency || "taka";
+  const num = Number(n).toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
   // If symbol is more than 2 chars (word like "taka"), put AFTER: "1,234.00 taka"
   return sym.length > 2 ? `${num} ${sym}` : `${sym}${num}`;
 }
 // ── QUICK CATEGORY CREATOR ──────────────────────────────
 function buildQcatPickers() {
   // Emoji grid inside quick cat panel
-  const emojiEl = document.getElementById('qcatEmojis');
+  const emojiEl = document.getElementById("qcatEmojis");
   if (emojiEl) {
-    emojiEl.innerHTML = PRESET_EMOJIS.slice(0, 15).map(e =>
-      `<button type="button" class="qcat-emoji-btn" data-e="${e}">${e}</button>`
-    ).join('');
-    emojiEl.querySelectorAll('.qcat-emoji-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
+    emojiEl.innerHTML = PRESET_EMOJIS.slice(0, 15)
+      .map(
+        (e) =>
+          `<button type="button" class="qcat-emoji-btn" data-e="${e}">${e}</button>`,
+      )
+      .join("");
+    emojiEl.querySelectorAll(".qcat-emoji-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
         qcatSelectedEmoji = btn.dataset.e;
-        document.getElementById('qcatIcon').value = qcatSelectedEmoji;
-        emojiEl.querySelectorAll('.qcat-emoji-btn').forEach(b => b.classList.remove('selected'));
-        btn.classList.add('selected');
+        document.getElementById("qcatIcon").value = qcatSelectedEmoji;
+        emojiEl
+          .querySelectorAll(".qcat-emoji-btn")
+          .forEach((b) => b.classList.remove("selected"));
+        btn.classList.add("selected");
       });
     });
   }
   // Color grid
-  const colorEl = document.getElementById('qcatColors');
+  const colorEl = document.getElementById("qcatColors");
   if (colorEl) {
-    colorEl.innerHTML = PRESET_COLORS.map(c =>
-      `<button type="button" class="qcat-color-btn${c === qcatSelectedColor ? ' selected' : ''}" data-c="${c}" style="background:${c};"></button>`
-    ).join('');
-    colorEl.querySelectorAll('.qcat-color-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
+    colorEl.innerHTML = PRESET_COLORS.map(
+      (c) =>
+        `<button type="button" class="qcat-color-btn${c === qcatSelectedColor ? " selected" : ""}" data-c="${c}" style="background:${c};"></button>`,
+    ).join("");
+    colorEl.querySelectorAll(".qcat-color-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
         qcatSelectedColor = btn.dataset.c;
-        colorEl.querySelectorAll('.qcat-color-btn').forEach(b => b.classList.remove('selected'));
-        btn.classList.add('selected');
+        colorEl
+          .querySelectorAll(".qcat-color-btn")
+          .forEach((b) => b.classList.remove("selected"));
+        btn.classList.add("selected");
       });
     });
   }
 }
 
 function toggleQuickCat() {
-  const panel = document.getElementById('qcatPanel');
-  const isOpen = panel.classList.contains('open');
-  panel.classList.toggle('open', !isOpen);
+  const panel = document.getElementById("qcatPanel");
+  const isOpen = panel.classList.contains("open");
+  panel.classList.toggle("open", !isOpen);
   if (!isOpen) {
     // Reset fields when opening
-    document.getElementById('qcatName').value = '';
-    document.getElementById('qcatIcon').value = '';
-    qcatSelectedEmoji = '';
+    document.getElementById("qcatName").value = "";
+    document.getElementById("qcatIcon").value = "";
+    qcatSelectedEmoji = "";
     qcatSelectedColor = PRESET_COLORS[0];
     buildQcatPickers();
-    setTimeout(() => document.getElementById('qcatName').focus(), 100);
+    setTimeout(() => document.getElementById("qcatName").focus(), 100);
   }
 }
 
 function saveQuickCategory() {
-  const name = document.getElementById('qcatName').value.trim();
-  const icon = document.getElementById('qcatIcon').value.trim() || qcatSelectedEmoji || '🏷️';
+  const name = document.getElementById("qcatName").value.trim();
+  const icon =
+    document.getElementById("qcatIcon").value.trim() ||
+    qcatSelectedEmoji ||
+    "🏷️";
   const color = qcatSelectedColor || PRESET_COLORS[0];
 
   if (!name) {
-    document.getElementById('qcatName').focus();
-    showToast('Please enter a category name.', 'error');
+    document.getElementById("qcatName").focus();
+    showToast("Please enter a category name.", "error");
     return;
   }
 
   // Prevent duplicates
-  if (state.categories.find(c => c.name.toLowerCase() === name.toLowerCase())) {
-    showToast(`"${name}" already exists. Select it from the list.`, 'error');
+  if (
+    state.categories.find((c) => c.name.toLowerCase() === name.toLowerCase())
+  ) {
+    showToast(`"${name}" already exists. Select it from the list.`, "error");
     return;
   }
 
@@ -612,16 +711,16 @@ function saveQuickCategory() {
 
   // Refresh the custom select with new options and auto-select new category
   populateCategoryDropdowns();
-  csSetValue('expCategory', newCat.id);
+  csSetValue("expCategory", newCat.id);
 
   // Refresh categories page grid too
   renderCategories();
 
   // Close panel
-  const panel = document.getElementById('qcatPanel');
-  panel.classList.remove('open');
+  const panel = document.getElementById("qcatPanel");
+  panel.classList.remove("open");
 
-  showToast(`"${icon} ${name}" created and selected!`, 'success');
+  showToast(`"${icon} ${name}" created and selected!`, "success");
 }
 
 // ── PERSISTENCE ────────────────────────────────────────
@@ -679,11 +778,11 @@ function closeSidebar() {
 
 // ── DATE HELPERS ───────────────────────────────────────
 function setTodayDates() {
-  const today = new Date().toISOString().split('T')[0];
-  dpSetValue('expDate', today);
-  dpSetValue('balDate', today);
-  dpSetValue('exportFrom', firstDayOfMonth());
-  dpSetValue('exportTo', today);
+  const today = new Date().toISOString().split("T")[0];
+  dpSetValue("expDate", today);
+  dpSetValue("balDate", today);
+  dpSetValue("exportFrom", firstDayOfMonth());
+  dpSetValue("exportTo", today);
 }
 function firstDayOfMonth() {
   const d = new Date();
@@ -726,17 +825,43 @@ function renderAll() {
 
 // ── DASHBOARD ──────────────────────────────────────────
 function renderDashboard() {
-  const totalExpenses = state.expenses.reduce(
-    (s, e) => s + Number(e.amount),
-    0,
-  );
-  const totalIncome = state.balanceRecords.reduce(
-    (s, b) => s + (b.type === "set" ? Number(b.amount) : Number(b.amount)),
-    0,
-  );
-  const latestBalance = computeCurrentBalance();
+  const all = [];
+  state.balanceRecords.forEach((b) => all.push({ ...b, _isExp: false }));
+  state.expenses.forEach((e) => all.push({ ...e, _isExp: true }));
 
-  document.getElementById("dashBalance").textContent = fmtAmount(latestBalance);
+  all.sort((a, b) => {
+    const dA = new Date(a.date).getTime();
+    const dB = new Date(b.date).getTime();
+    if (dA === dB)
+      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+    return dA - dB;
+  });
+
+  let balance = 0;
+  let totalIncome = 0;
+  let totalExpenses = 0;
+
+  all.forEach((item) => {
+    if (item._isExp) {
+      balance -= Number(item.amount);
+      totalExpenses += Number(item.amount);
+    } else {
+      if (item.type === "set") {
+        const diff = Number(item.amount) - balance;
+        if (diff >= 0) {
+          totalIncome += diff;
+        } else {
+          totalExpenses += Math.abs(diff);
+        }
+        balance = Number(item.amount);
+      } else {
+        balance += Number(item.amount);
+        totalIncome += Number(item.amount);
+      }
+    }
+  });
+
+  document.getElementById("dashBalance").textContent = fmtAmount(balance);
   document.getElementById("dashIncome").textContent = fmtAmount(totalIncome);
   document.getElementById("dashExpenses").textContent =
     fmtAmount(totalExpenses);
@@ -744,9 +869,13 @@ function renderDashboard() {
     `${state.expenses.length} transaction${state.expenses.length !== 1 ? "s" : ""}`;
 
   if (state.balanceRecords.length > 0) {
-    const latest = state.balanceRecords[state.balanceRecords.length - 1];
+    const latest = [...state.balanceRecords]
+      .sort((a, b) => new Date(a.date) - new Date(b.date))
+      .pop();
     document.getElementById("dashBalanceDate").textContent =
       `As of ${fmtDate(latest.date)}`;
+  } else {
+    document.getElementById("dashBalanceDate").textContent = "As of today";
   }
 
   renderRecentTransactions();
@@ -755,22 +884,27 @@ function renderDashboard() {
 }
 
 function computeCurrentBalance() {
+  const all = [];
+  state.balanceRecords.forEach((b) => all.push({ ...b, _isExp: false }));
+  state.expenses.forEach((e) => all.push({ ...e, _isExp: true }));
+
+  all.sort((a, b) => {
+    const dA = new Date(a.date).getTime();
+    const dB = new Date(b.date).getTime();
+    if (dA === dB)
+      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+    return dA - dB;
+  });
+
   let balance = 0;
-  // Find last "set" record
-  const setIdx = state.balanceRecords.map((r) => r.type).lastIndexOf("set");
-  if (setIdx >= 0) {
-    balance = Number(state.balanceRecords[setIdx].amount);
-    // Add all "add" records after the last set
-    for (let i = setIdx + 1; i < state.balanceRecords.length; i++) {
-      if (state.balanceRecords[i].type === "add")
-        balance += Number(state.balanceRecords[i].amount);
+  all.forEach((item) => {
+    if (item._isExp) {
+      balance -= Number(item.amount);
+    } else {
+      if (item.type === "set") balance = Number(item.amount);
+      else balance += Number(item.amount);
     }
-  } else {
-    // All are "add"
-    balance = state.balanceRecords.reduce((s, r) => s + Number(r.amount), 0);
-  }
-  // Subtract all expenses
-  balance -= state.expenses.reduce((s, e) => s + Number(e.amount), 0);
+  });
   return balance;
 }
 
@@ -838,9 +972,9 @@ function renderChart() {
   // ── DPI fix: scale canvas for crisp text on retina/high-DPI screens ──
   const dpr = window.devicePixelRatio || 1;
   const SIZE = 220;
-  canvas.width  = SIZE * dpr;
+  canvas.width = SIZE * dpr;
   canvas.height = SIZE * dpr;
-  canvas.style.width  = SIZE + "px";
+  canvas.style.width = SIZE + "px";
   canvas.style.height = SIZE + "px";
 
   const entries = Object.entries(groups).sort((a, b) => b[1] - a[1]);
@@ -849,7 +983,10 @@ function renderChart() {
   // Scale all drawing by dpr so logical coords (cx=110 etc.) stay the same
   ctx.scale(dpr, dpr);
 
-  const cx = 110, cy = 110, outerR = 100, innerR = 60;
+  const cx = 110,
+    cy = 110,
+    outerR = 100,
+    innerR = 60;
 
   let startAngle = -Math.PI / 2;
   const colors = entries.map(([id]) => {
@@ -1001,45 +1138,48 @@ function populateCategoryFilter() {
       )
       .join("");
   sel.value = cur;
-  gcsRefresh('txCategoryFilter');
+  gcsRefresh("txCategoryFilter");
 }
 
 // ── ADD EXPENSE MODAL ──────────────────────────────────
 function openAddExpenseModal(editId = null) {
-  const modal = document.getElementById('addExpenseModal');
-  const form = document.getElementById('expenseForm');
-  const today = new Date().toISOString().split('T')[0];
+  const modal = document.getElementById("addExpenseModal");
+  const form = document.getElementById("expenseForm");
+  const today = new Date().toISOString().split("T")[0];
 
   if (editId) {
-    const exp = state.expenses.find(e => e.id === editId);
+    const exp = state.expenses.find((e) => e.id === editId);
     if (!exp) return;
-    document.getElementById('expenseEditId').value = editId;
-    document.getElementById('expDesc').value = exp.desc;
-    document.getElementById('expAmount').value = exp.amount;
-    dpSetValue('expDate', exp.date);
-    csSetValue('expCategory', exp.categoryId);
-    document.getElementById('expNote').value = exp.note || '';
-    document.getElementById('expenseModalTitle').textContent = 'Edit Expense';
-    document.getElementById('expenseSubmitBtn').textContent = 'Save Changes';
+    document.getElementById("expenseEditId").value = editId;
+    document.getElementById("expDesc").value = exp.desc;
+    document.getElementById("expAmount").value = exp.amount;
+    dpSetValue("expDate", exp.date);
+    csSetValue("expCategory", exp.categoryId);
+    document.getElementById("expNote").value = exp.note || "";
+    document.getElementById("expenseModalTitle").textContent = "Edit Expense";
+    document.getElementById("expenseSubmitBtn").textContent = "Save Changes";
   } else {
     form.reset();
-    document.getElementById('expenseEditId').value = '';
-    dpSetValue('expDate', today);
-    csSetValue('expCategory', '');
-    document.getElementById('expenseModalTitle').textContent = 'Add Expense';
-    document.getElementById('expenseSubmitBtn').textContent = 'Add Expense';
+    document.getElementById("expenseEditId").value = "";
+    dpSetValue("expDate", today);
+    csSetValue("expCategory", "");
+    document.getElementById("expenseModalTitle").textContent = "Add Expense";
+    document.getElementById("expenseSubmitBtn").textContent = "Add Expense";
   }
   // Re-populate category dropdown (reset() clears it)
   populateCategoryDropdowns();
-  modal.classList.add('open');
+  modal.classList.add("open");
 }
 function closeAddExpenseModal() {
-  document.getElementById('addExpenseModal').classList.remove('open');
+  document.getElementById("addExpenseModal").classList.remove("open");
   // Also collapse quick-cat panel if open
-  const panel = document.getElementById('qcatPanel');
-  const togBtn = document.getElementById('qcatToggleBtn');
-  if (panel) panel.classList.remove('open');
-  if (togBtn) { togBtn.classList.remove('active'); togBtn.textContent = '＋ New Category'; }
+  const panel = document.getElementById("qcatPanel");
+  const togBtn = document.getElementById("qcatToggleBtn");
+  if (panel) panel.classList.remove("open");
+  if (togBtn) {
+    togBtn.classList.remove("active");
+    togBtn.textContent = "＋ New Category";
+  }
 }
 function handleModalBackdropClick(e) {
   if (e.target === document.getElementById("addExpenseModal"))
@@ -1048,15 +1188,15 @@ function handleModalBackdropClick(e) {
 
 function saveExpense(event) {
   event.preventDefault();
-  const editId = document.getElementById('expenseEditId').value;
-  const desc = document.getElementById('expDesc').value.trim();
-  const amount = parseFloat(document.getElementById('expAmount').value);
-  const date = dpGetValue('expDate');
-  const catId = csGetValue('expCategory');
-  const note = document.getElementById('expNote').value.trim();
+  const editId = document.getElementById("expenseEditId").value;
+  const desc = document.getElementById("expDesc").value.trim();
+  const amount = parseFloat(document.getElementById("expAmount").value);
+  const date = dpGetValue("expDate");
+  const catId = csGetValue("expCategory");
+  const note = document.getElementById("expNote").value.trim();
 
   if (!desc || !amount || !date || !catId) {
-    if (!catId) showToast('Please select a category.', 'error');
+    if (!catId) showToast("Please select a category.", "error");
     return;
   }
   if (editId) {
@@ -1218,34 +1358,47 @@ function renderCategories() {
 // ── CATEGORY DROPDOWNS ─────────────────────────────────
 function populateCategoryDropdowns() {
   // Sync native <select> options (for form validation fallback)
-  const sel = document.getElementById('expCategory');
+  const sel = document.getElementById("expCategory");
   if (!sel) return;
   const cur = sel.value;
-  sel.innerHTML = '<option value="">Select a category</option>' +
-    state.categories.map(c => `<option value="${c.id}">${c.icon} ${escHtml(c.name)}</option>`).join('');
-  if (cur && state.categories.find(c => c.id === cur)) sel.value = cur;
+  sel.innerHTML =
+    '<option value="">Select a category</option>' +
+    state.categories
+      .map(
+        (c) => `<option value="${c.id}">${c.icon} ${escHtml(c.name)}</option>`,
+      )
+      .join("");
+  if (cur && state.categories.find((c) => c.id === cur)) sel.value = cur;
   // Sync the custom select UI
-  csRefresh('expCategory', state.categories);
-  if (cur && state.categories.find(c => c.id === cur)) csSetValue('expCategory', cur);
+  csRefresh("expCategory", state.categories);
+  if (cur && state.categories.find((c) => c.id === cur))
+    csSetValue("expCategory", cur);
   populateCategoryFilter();
 }
 
 // ── BALANCE PAGE ───────────────────────────────────────
 function addBalance(event) {
   event.preventDefault();
-  const amount = parseFloat(document.getElementById('balAmount').value);
-  const date = dpGetValue('balDate');
-  const note = document.getElementById('balNote').value.trim();
+  const amount = parseFloat(document.getElementById("balAmount").value);
+  const date = dpGetValue("balDate");
+  const note = document.getElementById("balNote").value.trim();
   const type = document.querySelector('input[name="balType"]:checked').value;
 
   if (!amount || !date) return;
 
-  state.balanceRecords.push({ id: uid(), amount, date, note, type, createdAt: new Date().toISOString() });
+  state.balanceRecords.push({
+    id: uid(),
+    amount,
+    date,
+    note,
+    type,
+    createdAt: new Date().toISOString(),
+  });
   saveState();
   renderAll();
-  document.getElementById('balanceForm').reset();
-  dpSetValue('balDate', new Date().toISOString().split('T')[0]);
-  showToast('Balance record saved!', 'success');
+  document.getElementById("balanceForm").reset();
+  dpSetValue("balDate", new Date().toISOString().split("T")[0]);
+  showToast("Balance record saved!", "success");
 }
 
 function renderBalanceHistory() {
@@ -1428,96 +1581,119 @@ function exportPrint() {
 }
 
 async function exportPNG() {
-  const card = document.getElementById('exportPreviewCard');
-  if (!card) { showToast('Preview card not found.', 'error'); return; }
+  const card = document.getElementById("exportPreviewCard");
+  if (!card) {
+    showToast("Preview card not found.", "error");
+    return;
+  }
   const { expenses } = getExportData();
-  if (!expenses.length) { showToast('No data to export as PNG.', 'error'); return; }
+  if (!expenses.length) {
+    showToast("No data to export as PNG.", "error");
+    return;
+  }
 
-  showToast('Generating image…', 'info');
+  showToast("Generating image…", "info");
   try {
     const canvas = await html2canvas(card, {
-      backgroundColor: '#13162b',
+      backgroundColor: "#13162b",
       scale: 2,
       useCORS: true,
       logging: false,
     });
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.download = `SpendWise_Preview_${today()}.png`;
-    link.href = canvas.toDataURL('image/png');
+    link.href = canvas.toDataURL("image/png");
     link.click();
-    showToast('PNG downloaded!', 'success');
+    showToast("PNG downloaded!", "success");
   } catch (err) {
-    showToast('PNG export failed: ' + err.message, 'error');
+    showToast("PNG export failed: " + err.message, "error");
   }
 }
 
 function exportCopyText() {
   const { expenses } = getExportData();
-  if (!expenses.length) { showToast('No expenses in the selected range.', 'error'); return; }
+  if (!expenses.length) {
+    showToast("No expenses in the selected range.", "error");
+    return;
+  }
 
-  const sym = state.currency || 'taka';
+  const sym = state.currency || "taka";
   const isWord = sym.length > 2;
-  const fmt = n => isWord
-    ? `${Math.round(Number(n))} ${sym}`
-    : `${sym}${Number(n).toFixed(2)}`;
+  const fmt = (n) =>
+    isWord
+      ? `${Math.round(Number(n))} ${sym}`
+      : `${sym}${Number(n).toFixed(2)}`;
 
-  const sorted = [...expenses].sort((a, b) => new Date(a.date) - new Date(b.date));
+  const sorted = [...expenses].sort(
+    (a, b) => new Date(a.date) - new Date(b.date),
+  );
 
   // Group by date
   const byDate = {};
-  sorted.forEach(e => {
+  sorted.forEach((e) => {
     (byDate[e.date] = byDate[e.date] || []).push(e);
   });
 
   let lines = [];
-  lines.push('=== SpendWise Expense Report ===');
-  lines.push(`Generated: ${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`);
-  lines.push('');
+  lines.push("=== SpendWise Expense Report ===");
+  lines.push(
+    `Generated: ${new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}`,
+  );
+  lines.push("");
 
-  Object.keys(byDate).sort().forEach(date => {
-    lines.push(`▶ ${fmtDate(date)}`);
-    byDate[date].forEach(e => {
-      const cat = state.categories.find(c => c.id === e.categoryId);
-      const catLabel = cat ? `${cat.icon} ${cat.name}` : 'Other';
-      lines.push(`  ${e.desc}: ${fmt(e.amount)}  [${catLabel}]${e.note ? '  • ' + e.note : ''}`);
+  Object.keys(byDate)
+    .sort()
+    .forEach((date) => {
+      lines.push(`▶ ${fmtDate(date)}`);
+      byDate[date].forEach((e) => {
+        const cat = state.categories.find((c) => c.id === e.categoryId);
+        const catLabel = cat ? `${cat.icon} ${cat.name}` : "Other";
+        lines.push(
+          `  ${e.desc}: ${fmt(e.amount)}  [${catLabel}]${e.note ? "  • " + e.note : ""}`,
+        );
+      });
+      const dayTotal = byDate[date].reduce((s, e) => s + Number(e.amount), 0);
+      lines.push(`  ─── Day total: ${fmt(dayTotal)}`);
+      lines.push("");
     });
-    const dayTotal = byDate[date].reduce((s, e) => s + Number(e.amount), 0);
-    lines.push(`  ─── Day total: ${fmt(dayTotal)}`);
-    lines.push('');
-  });
 
   const grandTotal = expenses.reduce((s, e) => s + Number(e.amount), 0);
-  lines.push('================================');
+  lines.push("================================");
   lines.push(`Total Spent : ${fmt(grandTotal)}`);
   lines.push(`Balance     : ${fmt(computeCurrentBalance())}`);
-  lines.push('================================');
+  lines.push("================================");
 
   // Show preview modal
-  document.getElementById('copyTextArea').value = lines.join('\n');
-  document.getElementById('copyTextModal').classList.add('open');
+  document.getElementById("copyTextArea").value = lines.join("\n");
+  document.getElementById("copyTextModal").classList.add("open");
 }
 
 function doCopy() {
-  const text = document.getElementById('copyTextArea').value;
+  const text = document.getElementById("copyTextArea").value;
   if (navigator.clipboard) {
-    navigator.clipboard.writeText(text).then(() => {
-      showToast('Copied to clipboard!', 'success');
-      closeCopyModal();
-    }).catch(() => fallbackCopy(text));
-  } else { fallbackCopy(text); }
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        showToast("Copied to clipboard!", "success");
+        closeCopyModal();
+      })
+      .catch(() => fallbackCopy(text));
+  } else {
+    fallbackCopy(text);
+  }
 }
 function fallbackCopy(text) {
-  const ta = document.getElementById('copyTextArea');
+  const ta = document.getElementById("copyTextArea");
   ta.select();
-  document.execCommand('copy');
-  showToast('Copied!', 'success');
+  document.execCommand("copy");
+  showToast("Copied!", "success");
   closeCopyModal();
 }
 function closeCopyModal() {
-  document.getElementById('copyTextModal').classList.remove('open');
+  document.getElementById("copyTextModal").classList.remove("open");
 }
 function handleCopyModalBackdrop(e) {
-  if (e.target === document.getElementById('copyTextModal')) closeCopyModal();
+  if (e.target === document.getElementById("copyTextModal")) closeCopyModal();
 }
 
 function downloadFile(name, content, type) {
@@ -1538,57 +1714,72 @@ function csvEsc(s) {
 
 // ── EXPORT TABS ────────────────────────────────────────
 function switchExportTab(tab) {
-  document.querySelectorAll('.export-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.export-tab-panel').forEach(p => p.classList.remove('active'));
+  document
+    .querySelectorAll(".export-tab")
+    .forEach((t) => t.classList.remove("active"));
+  document
+    .querySelectorAll(".export-tab-panel")
+    .forEach((p) => p.classList.remove("active"));
   const tabEl = document.getElementById(`tab-${tab}`);
   const panelEl = document.getElementById(`panel-${tab}`);
-  if (tabEl) tabEl.classList.add('active');
-  if (panelEl) panelEl.classList.add('active');
-  if (tab === 'export') renderExportPreview();
+  if (tabEl) tabEl.classList.add("active");
+  if (panelEl) panelEl.classList.add("active");
+  if (tab === "export") renderExportPreview();
 }
 
 // ── FULL BACKUP EXPORT ─────────────────────────────────
 function buildFullBackupPayload() {
   return {
-    _format: 'spendwise_backup',
-    _version: '2.0',
+    _format: "spendwise_backup",
+    _version: "2.0",
     _exportedAt: new Date().toISOString(),
-    _appName: 'SpendWise',
+    _appName: "SpendWise",
     expenses: state.expenses,
     categories: state.categories,
     balanceRecords: state.balanceRecords,
-    currency: state.currency || 'taka',
+    currency: state.currency || "taka",
   };
 }
 
 function exportFullBackup() {
   const payload = buildFullBackupPayload();
   const json = JSON.stringify(payload, null, 2);
-  downloadFile(`SpendWise_FullBackup_${today()}.spendwise`, json, 'application/json');
-  showToast(`🔒 Full backup downloaded (${state.expenses.length} expenses, ${state.categories.length} categories)`, 'success');
+  downloadFile(
+    `SpendWise_FullBackup_${today()}.spendwise`,
+    json,
+    "application/json",
+  );
+  showToast(
+    `🔒 Full backup downloaded (${state.expenses.length} expenses, ${state.categories.length} categories)`,
+    "success",
+  );
 }
 
 function exportFullBackupJSON() {
   const payload = buildFullBackupPayload();
   const json = JSON.stringify(payload, null, 2);
-  downloadFile(`SpendWise_FullBackup_${today()}.json`, json, 'application/json');
-  showToast(`📦 Full backup downloaded as JSON`, 'success');
+  downloadFile(
+    `SpendWise_FullBackup_${today()}.json`,
+    json,
+    "application/json",
+  );
+  showToast(`📦 Full backup downloaded as JSON`, "success");
 }
 
 // ── IMPORT & RESTORE ───────────────────────────────────
 let _importData = null;
 
 function initImportDropzone() {
-  const dz = document.getElementById('importDropzone');
+  const dz = document.getElementById("importDropzone");
   if (!dz) return;
-  dz.addEventListener('dragover', (e) => {
+  dz.addEventListener("dragover", (e) => {
     e.preventDefault();
-    dz.classList.add('dragover');
+    dz.classList.add("dragover");
   });
-  dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
-  dz.addEventListener('drop', (e) => {
+  dz.addEventListener("dragleave", () => dz.classList.remove("dragover"));
+  dz.addEventListener("drop", (e) => {
     e.preventDefault();
-    dz.classList.remove('dragover');
+    dz.classList.remove("dragover");
     const file = e.dataTransfer.files[0];
     if (file) processImportFile(file);
   });
@@ -1607,26 +1798,33 @@ function processImportFile(file) {
       const parsed = JSON.parse(e.target.result);
       // Validate it's a SpendWise backup
       if (!parsed.expenses && !parsed.categories && !parsed.balanceRecords) {
-        showToast('Invalid backup file. Please use a .spendwise or full JSON backup.', 'error');
+        showToast(
+          "Invalid backup file. Please use a .spendwise or full JSON backup.",
+          "error",
+        );
         return;
       }
       _importData = parsed;
       showImportPreview(file.name, parsed);
     } catch (err) {
-      showToast('Could not read file: ' + err.message, 'error');
+      showToast("Could not read file: " + err.message, "error");
     }
   };
   reader.readAsText(file);
 }
 
 function showImportPreview(fileName, data) {
-  document.getElementById('importFileName').textContent = fileName;
-  const statsEl = document.getElementById('importStats');
+  document.getElementById("importFileName").textContent = fileName;
+  const statsEl = document.getElementById("importStats");
   const expenses = Array.isArray(data.expenses) ? data.expenses : [];
   const categories = Array.isArray(data.categories) ? data.categories : [];
-  const balances = Array.isArray(data.balanceRecords) ? data.balanceRecords : [];
-  const currency = data.currency || 'taka';
-  const exportDate = data._exportedAt ? new Date(data._exportedAt).toLocaleString() : 'Unknown';
+  const balances = Array.isArray(data.balanceRecords)
+    ? data.balanceRecords
+    : [];
+  const currency = data.currency || "taka";
+  const exportDate = data._exportedAt
+    ? new Date(data._exportedAt).toLocaleString()
+    : "Unknown";
   statsEl.innerHTML = `
     <div class="import-stat"><span class="import-stat-val">${expenses.length}</span><span class="import-stat-label">Expenses</span></div>
     <div class="import-stat"><span class="import-stat-val">${categories.length}</span><span class="import-stat-label">Categories</span></div>
@@ -1634,76 +1832,93 @@ function showImportPreview(fileName, data) {
     <div class="import-stat"><span class="import-stat-val">${currency}</span><span class="import-stat-label">Currency</span></div>
     <div class="import-stat-date">📅 Exported: ${exportDate}</div>
   `;
-  document.getElementById('importPreview').style.display = 'block';
-  document.getElementById('importDropzone').style.display = 'none';
+  document.getElementById("importPreview").style.display = "block";
+  document.getElementById("importDropzone").style.display = "none";
 }
 
 function clearImportPreview() {
   _importData = null;
-  document.getElementById('importPreview').style.display = 'none';
-  document.getElementById('importDropzone').style.display = '';
-  document.getElementById('importFileInput').value = '';
+  document.getElementById("importPreview").style.display = "none";
+  document.getElementById("importDropzone").style.display = "";
+  document.getElementById("importFileInput").value = "";
 }
 
 function executeImport() {
-  if (!_importData) { showToast('No file loaded.', 'error'); return; }
-  const mode = document.querySelector('input[name="importMode"]:checked')?.value || 'merge';
+  if (!_importData) {
+    showToast("No file loaded.", "error");
+    return;
+  }
+  const mode =
+    document.querySelector('input[name="importMode"]:checked')?.value ||
+    "merge";
   const incoming = {
     expenses: Array.isArray(_importData.expenses) ? _importData.expenses : [],
-    categories: Array.isArray(_importData.categories) ? _importData.categories : [],
-    balanceRecords: Array.isArray(_importData.balanceRecords) ? _importData.balanceRecords : [],
-    currency: _importData.currency || state.currency || 'taka',
+    categories: Array.isArray(_importData.categories)
+      ? _importData.categories
+      : [],
+    balanceRecords: Array.isArray(_importData.balanceRecords)
+      ? _importData.balanceRecords
+      : [],
+    currency: _importData.currency || state.currency || "taka",
   };
 
   let finalState;
-  let mergeMsg = '';
+  let mergeMsg = "";
 
-  if (mode === 'replace') {
+  if (mode === "replace") {
     finalState = incoming;
     mergeMsg = `Replaced all data with ${incoming.expenses.length} expenses and ${incoming.balanceRecords.length} balance records.`;
   } else {
     // Smart merge
     const mergeArr = (local, cloud) => {
       const map = {};
-      [...(local || []), ...(cloud || [])].forEach(item => {
+      [...(local || []), ...(cloud || [])].forEach((item) => {
         const existing = map[item.id];
-        if (!existing) { map[item.id] = item; return; }
-        const existTs = existing.updatedAt || existing.createdAt || '';
-        const newTs = item.updatedAt || item.createdAt || '';
+        if (!existing) {
+          map[item.id] = item;
+          return;
+        }
+        const existTs = existing.updatedAt || existing.createdAt || "";
+        const newTs = item.updatedAt || item.createdAt || "";
         if (newTs > existTs) map[item.id] = item;
       });
       return Object.values(map);
     };
     const catMap = {};
-    [...(incoming.categories || [])].forEach(c => catMap[c.id] = c);
-    [...(state.categories || [])].forEach(c => { if (!catMap[c.id]) catMap[c.id] = c; });
+    [...(incoming.categories || [])].forEach((c) => (catMap[c.id] = c));
+    [...(state.categories || [])].forEach((c) => {
+      if (!catMap[c.id]) catMap[c.id] = c;
+    });
 
     const mergedExpenses = mergeArr(state.expenses, incoming.expenses);
-    const mergedBalances = mergeArr(state.balanceRecords, incoming.balanceRecords);
+    const mergedBalances = mergeArr(
+      state.balanceRecords,
+      incoming.balanceRecords,
+    );
     finalState = {
       expenses: mergedExpenses,
       categories: Object.values(catMap),
       balanceRecords: mergedBalances,
-      currency: incoming.currency || state.currency || 'taka',
+      currency: incoming.currency || state.currency || "taka",
     };
     const newExpenses = mergedExpenses.length - state.expenses.length;
     const newBalances = mergedBalances.length - state.balanceRecords.length;
-    mergeMsg = `Merge complete! Added ${Math.max(0,newExpenses)} new expenses and ${Math.max(0,newBalances)} new balance records. Total: ${mergedExpenses.length} expenses.`;
+    mergeMsg = `Merge complete! Added ${Math.max(0, newExpenses)} new expenses and ${Math.max(0, newBalances)} new balance records. Total: ${mergedExpenses.length} expenses.`;
   }
 
   // Save and reload
-  localStorage.setItem('spendwise_v2', JSON.stringify(finalState));
+  localStorage.setItem("spendwise_v2", JSON.stringify(finalState));
   loadState();
   renderAll();
   clearImportPreview();
 
   // Show result modal
-  document.getElementById('importResultMsg').textContent = mergeMsg;
-  document.getElementById('importResultModal').classList.add('open');
+  document.getElementById("importResultMsg").textContent = mergeMsg;
+  document.getElementById("importResultModal").classList.add("open");
 }
 
 function closeImportResultModal() {
-  document.getElementById('importResultModal').classList.remove('open');
+  document.getElementById("importResultModal").classList.remove("open");
 }
 
 // ── TOAST ──────────────────────────────────────────────
@@ -1745,14 +1960,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // ── PWA & INSTALLATION ─────────────────────────────────
 let deferredPrompt;
-window.addEventListener('beforeinstallprompt', (e) => {
+window.addEventListener("beforeinstallprompt", (e) => {
   // Prevent the mini-infobar from appearing on mobile
   e.preventDefault();
   // Stash the event so it can be triggered later.
   deferredPrompt = e;
   // Update UI notify the user they can install the PWA
-  const installBtn = document.getElementById('nav-install');
-  if (installBtn) installBtn.style.display = 'flex';
+  const installBtn = document.getElementById("nav-install");
+  if (installBtn) installBtn.style.display = "flex";
 });
 
 function installPWA() {
@@ -1761,48 +1976,55 @@ function installPWA() {
   deferredPrompt.prompt();
   // Wait for the user to respond to the prompt
   deferredPrompt.userChoice.then((choiceResult) => {
-    if (choiceResult.outcome === 'accepted') {
-      console.log('User accepted the install prompt');
-      const installBtn = document.getElementById('nav-install');
-      if (installBtn) installBtn.style.display = 'none';
+    if (choiceResult.outcome === "accepted") {
+      console.log("User accepted the install prompt");
+      const installBtn = document.getElementById("nav-install");
+      if (installBtn) installBtn.style.display = "none";
     }
     deferredPrompt = null;
   });
 }
 
-window.addEventListener('appinstalled', (evt) => {
+window.addEventListener("appinstalled", (evt) => {
   // Log install success
-  console.log('SpendWise was installed.', evt);
+  console.log("SpendWise was installed.", evt);
 });
 
 // Register Service Worker for offline capability & caching
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .then(reg => {
-        console.log('ServiceWorker registration successful with scope: ', reg.scope);
-        
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker
+      .register("./sw.js")
+      .then((reg) => {
+        console.log(
+          "ServiceWorker registration successful with scope: ",
+          reg.scope,
+        );
+
         // Listen for new updates
         reg.onupdatefound = () => {
           const installingWorker = reg.installing;
           if (installingWorker == null) return;
           installingWorker.onstatechange = () => {
-            if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            if (
+              installingWorker.state === "installed" &&
+              navigator.serviceWorker.controller
+            ) {
               // New update available, refresh after a moment
-              showToast('App updated successfully! Refreshing...', 'info');
+              showToast("App updated successfully! Refreshing...", "info");
               setTimeout(() => window.location.reload(), 1500);
             }
           };
         };
       })
-      .catch(err => {
-        console.log('ServiceWorker registration failed: ', err);
+      .catch((err) => {
+        console.log("ServiceWorker registration failed: ", err);
       });
   });
 
   // Listen for SW messages
-  navigator.serviceWorker.addEventListener('message', (event) => {
-    if (event.data && event.data.type === 'SW_UPDATED') {
+  navigator.serviceWorker.addEventListener("message", (event) => {
+    if (event.data && event.data.type === "SW_UPDATED") {
       window.location.reload();
     }
   });
