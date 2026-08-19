@@ -1641,9 +1641,31 @@ async function exportPNG() {
       useCORS: true,
       logging: false,
     });
+    const filename = `SpendWise_Preview_${today()}.png`;
+    const b64Full = canvas.toDataURL("image/png");
+
+    if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+      const Filesystem = window.Capacitor.Plugins.Filesystem;
+      const Share = window.Capacitor.Plugins.Share;
+      if (Filesystem && Share) {
+        const b64Data = b64Full.split(",")[1];
+        const result = await Filesystem.writeFile({
+          path: filename,
+          data: b64Data,
+          directory: "DOCUMENTS",
+        });
+        await Share.share({
+          title: filename,
+          url: result.uri,
+        });
+        showToast("PNG ready to save/share!", "success");
+        return;
+      }
+    }
+
     const link = document.createElement("a");
-    link.download = `SpendWise_Preview_${today()}.png`;
-    link.href = canvas.toDataURL("image/png");
+    link.download = filename;
+    link.href = b64Full;
     link.click();
     showToast("PNG downloaded!", "success");
   } catch (err) {
@@ -1744,7 +1766,29 @@ function handleCopyModalBackdrop(e) {
   if (e.target === document.getElementById("copyTextModal")) closeCopyModal();
 }
 
-function downloadFile(name, content, type) {
+async function downloadFile(name, content, type) {
+  if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+    try {
+      const Filesystem = window.Capacitor.Plugins.Filesystem;
+      const Share = window.Capacitor.Plugins.Share;
+      if (Filesystem && Share) {
+        const result = await Filesystem.writeFile({
+          path: name,
+          data: content,
+          directory: "DOCUMENTS",
+          encoding: "utf8",
+        });
+        await Share.share({
+          title: name,
+          url: result.uri,
+        });
+        return;
+      }
+    } catch (e) {
+      console.error("[Capacitor Export Error]", e);
+    }
+  }
+
   const blob = new Blob([content], { type });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
