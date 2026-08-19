@@ -3,6 +3,10 @@
   "appName": "SpendWise",
   "webDir": "www",
   "server": {
-    "hostname": "localhost"
+    "hostname": "localhost",
+    "allowNavigation": [
+      "expenses-tracker-b3763.firebaseapp.com",
+      "*.firebaseapp.com"
+    ]
   }
 }
