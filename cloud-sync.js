@@ -140,9 +140,16 @@ async function initFirebase() {
     _cloudInitialized = true;
 
     try {
-      await getRedirectResult(_auth);
+      updateCloudStatus("syncing", "Finalizing Google Sign-in...");
+      const result = await getRedirectResult(_auth);
+      if (result && result.user) {
+        // Success
+      }
     } catch (err) {
       console.error("[SpendWise Cloud] Redirect sign-in error:", err);
+      const errMsg = err.message || "Unknown redirect error";
+      showToast("Redirect login failed: " + errMsg, "error");
+      updateCloudStatus("error", "Redirect login failed: " + errMsg);
     }
 
     onAuthStateChanged(_auth, async (user) => {
