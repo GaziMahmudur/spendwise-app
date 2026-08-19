@@ -190,8 +190,7 @@ async function cloudSignIn() {
 
   try {
     // Android native Firebase Authentication
-    // (Bypassed natively because without proper SHA-1 and explicit OAuth config, it hangs forever natively)
-    /*
+    // Active: User has been provided with their SHA-1 array for Firebase integration
     if (isNativeAndroid()) {
       const FirebaseAuthentication = await getNativeFirebaseAuthentication();
 
@@ -220,7 +219,6 @@ async function cloudSignIn() {
 
       return;
     }
-    */
 
     // Web fallback
     const { GoogleAuthProvider, signInWithPopup } = window._fsModules;

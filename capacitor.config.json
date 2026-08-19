@@ -8,5 +8,11 @@
       "expenses-tracker-b3763.firebaseapp.com",
       "*.firebaseapp.com"
     ]
+  },
+  "plugins": {
+    "FirebaseAuthentication": {
+      "skipNativeAuth": false,
+      "providers": ["google.com"]
+    }
   }
 }
