@@ -1,5 +1,8 @@
 {
   "appId": "io.spendwise.app",
   "appName": "SpendWise",
-  "webDir": "www"
+  "webDir": "www",
+  "server": {
+    "hostname": "localhost"
+  }
 }
