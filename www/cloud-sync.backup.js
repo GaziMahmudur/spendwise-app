@@ -24,7 +24,7 @@ const FIREBASE_CONFIG = {
   storageBucket: "expenses-tracker-b3763.firebasestorage.app",
   messagingSenderId: "724764110783",
   appId: "1:724764110783:web:f8aa8a393a808f5f397b0a",
-  measurementId: "G-KBNPCYKBHG",
+  measurementId: "G-KBNPCYKBHG"
 };
 
 // ─────────────────────────────────────────────────────
@@ -66,14 +66,12 @@ async function getNativeFirebaseAuthentication() {
   // Fallback for vanilla-JS projects where the plugin proxy is not exposed
   // globally. This does not require a bundler.
   try {
-    const mod =
-      await import("https://cdn.jsdelivr.net/npm/@capacitor-firebase/authentication@8.3.0/+esm");
+    const mod = await import(
+      "https://cdn.jsdelivr.net/npm/@capacitor-firebase/authentication@8.3.0/+esm"
+    );
     return mod.FirebaseAuthentication || null;
   } catch (err) {
-    console.error(
-      "[SpendWise Cloud] Could not load native Firebase Authentication plugin:",
-      err,
-    );
+    console.error("[SpendWise Cloud] Could not load native Firebase Authentication plugin:", err);
     return null;
   }
 }
@@ -90,7 +88,7 @@ async function initFirebase() {
     FIREBASE_CONFIG.appId === "YOUR_APP_ID"
   ) {
     console.warn(
-      "[SpendWise Cloud] Firebase Web App config is incomplete. Add the config from Firebase Console.",
+      "[SpendWise Cloud] Firebase Web App config is incomplete. Add the config from Firebase Console."
     );
     return false;
   }
@@ -106,8 +104,6 @@ async function initFirebase() {
       getAuth,
       GoogleAuthProvider,
       signInWithPopup,
-      signInWithRedirect,
-      getRedirectResult,
       signInWithCredential,
       signOut,
       onAuthStateChanged,
@@ -130,27 +126,12 @@ async function initFirebase() {
       collection,
       GoogleAuthProvider,
       signInWithPopup,
-      signInWithRedirect,
-      getRedirectResult,
       signInWithCredential,
       signOut,
       onAuthStateChanged,
     };
 
     _cloudInitialized = true;
-
-    try {
-      updateCloudStatus("syncing", "Finalizing Google Sign-in...");
-      const result = await getRedirectResult(_auth);
-      if (result && result.user) {
-        // Success
-      }
-    } catch (err) {
-      console.error("[SpendWise Cloud] Redirect sign-in error:", err);
-      const errMsg = err.message || "Unknown redirect error";
-      showToast("Redirect login failed: " + errMsg, "error");
-      updateCloudStatus("error", "Redirect login failed: " + errMsg);
-    }
 
     onAuthStateChanged(_auth, async (user) => {
       _currentUser = user;
@@ -181,69 +162,79 @@ async function cloudSignIn() {
   updateCloudStatus("signing-in", "Connecting to Google…");
 
   const ok = await initFirebase();
-
   if (!ok) {
-    updateCloudStatus("error", "Firebase initialization failed.");
-    showToast("Firebase initialization failed.", "error");
+    updateCloudStatus(
+      "error",
+      "Firebase Web App is not configured yet."
+    );
+    showToast(
+      "Firebase Web App config is missing. Add it to cloud-sync.js.",
+      "error"
+    );
     return;
   }
 
   try {
-    // Android native Firebase Authentication
-    // Active: User has been provided with their SHA-1 array for Firebase integration
+    const {
+      GoogleAuthProvider,
+      signInWithPopup,
+      signInWithCredential,
+    } = window._fsModules;
+
     if (isNativeAndroid()) {
-      const FirebaseAuthentication = await getNativeFirebaseAuthentication();
+      updateCloudStatus("signing-in", "Opening Google Sign-In…");
+
+      const FirebaseAuthentication =
+        await getNativeFirebaseAuthentication();
 
       if (!FirebaseAuthentication) {
         throw new Error(
-          "Native Firebase Authentication plugin is not available.",
+          "Native Firebase Authentication plugin is unavailable. Run npx cap sync android and rebuild the app."
         );
       }
 
       const result = await FirebaseAuthentication.signInWithGoogle();
 
-      console.log("[SpendWise Cloud] Native Google sign-in result:", result);
+      // The plugin returns the native Firebase credential. For Google,
+      // credential.idToken is the token accepted by GoogleAuthProvider.
+      const idToken = result?.credential?.idToken;
 
-      if (
-        result &&
-        result.credential &&
-        (result.credential.idToken || result.credential.accessToken)
-      ) {
-        const { GoogleAuthProvider, signInWithCredential } = window._fsModules;
-        const credential = GoogleAuthProvider.credential(
-          result.credential.idToken,
-          result.credential.accessToken,
+      if (!idToken) {
+        throw new Error(
+          "Google Sign-In succeeded natively, but no Google ID token was returned."
         );
-        await signInWithCredential(_auth, credential);
       }
 
+      const credential = GoogleAuthProvider.credential(idToken);
+      await signInWithCredential(_auth, credential);
+
+      showToast("☁️ Signed in with Google.", "success");
       return;
     }
 
-    // Web fallback
-    const { GoogleAuthProvider, signInWithPopup } = window._fsModules;
-    const provider = new GoogleAuthProvider();
+    // Normal browser/PWA flow.
+    updateCloudStatus("signing-in", "Opening Google Sign-In…");
 
-    // Use Popup instead of Redirect. Now that the domain is whitelisted,
-    // it will properly open the Google sign-in mini-tab without losing app state!
+    const provider = new GoogleAuthProvider();
     await signInWithPopup(_auth, provider);
   } catch (err) {
-    console.error("[SpendWise Cloud] Google sign-in error:", err);
+    console.error("[SpendWise Cloud] Google Sign-In error:", err);
 
-    let errorMsg = err.message || err;
-    if (
-      typeof errorMsg === "string" &&
-      errorMsg.includes("unauthorized-domain")
-    ) {
-      errorMsg =
-        "Unauthorized domain. Please add '" +
-        window.location.hostname +
-        "' to Firebase Console -> Authentication -> Settings -> Authorized Domains.";
+    const code = err?.code || "";
+    const message = String(err?.message || err || "");
+
+    const cancelled =
+      code === "auth/popup-closed-by-user" ||
+      code === "auth/cancelled-popup-request" ||
+      /cancel/i.test(message);
+
+    if (cancelled) {
+      updateCloudStatus("idle", "Sign in cancelled.");
+      return;
     }
 
-    updateCloudStatus("error", "Sign-in failed: " + errorMsg);
-
-    showToast("Sign-in failed: " + errorMsg, "error");
+    updateCloudStatus("error", "Sign-in failed: " + message);
+    showToast("Sign-in failed: " + message, "error");
   }
 }
 
@@ -256,13 +247,17 @@ async function cloudSignOut() {
     // Clear the native Firebase session too. This is harmless when the
     // plugin is unavailable because the web Firebase session is still cleared.
     if (isNativeAndroid()) {
-      const FirebaseAuthentication = await getNativeFirebaseAuthentication();
+      const FirebaseAuthentication =
+        await getNativeFirebaseAuthentication();
 
       if (FirebaseAuthentication) {
         try {
           await FirebaseAuthentication.signOut();
         } catch (nativeErr) {
-          console.warn("[SpendWise Cloud] Native sign-out warning:", nativeErr);
+          console.warn(
+            "[SpendWise Cloud] Native sign-out warning:",
+            nativeErr
+          );
         }
       }
     }
