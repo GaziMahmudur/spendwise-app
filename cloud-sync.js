@@ -223,21 +223,12 @@ async function cloudSignIn() {
     */
 
     // Web fallback
-    const { GoogleAuthProvider, signInWithPopup, signInWithRedirect } =
-      window._fsModules;
-
+    const { GoogleAuthProvider, signInWithPopup } = window._fsModules;
     const provider = new GoogleAuthProvider();
 
-    const isMobile =
-      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-        navigator.userAgent,
-      );
-
-    if (isMobile) {
-      await signInWithRedirect(_auth, provider);
-    } else {
-      await signInWithPopup(_auth, provider);
-    }
+    // Use Popup instead of Redirect. Now that the domain is whitelisted,
+    // it will properly open the Google sign-in mini-tab without losing app state!
+    await signInWithPopup(_auth, provider);
   } catch (err) {
     console.error("[SpendWise Cloud] Google sign-in error:", err);
 
