@@ -231,9 +231,20 @@ async function cloudSignIn() {
   } catch (err) {
     console.error("[SpendWise Cloud] Google sign-in error:", err);
 
-    updateCloudStatus("error", "Sign-in failed: " + (err.message || err));
+    let errorMsg = err.message || err;
+    if (
+      typeof errorMsg === "string" &&
+      errorMsg.includes("unauthorized-domain")
+    ) {
+      errorMsg =
+        "Unauthorized domain. Please add '" +
+        window.location.hostname +
+        "' to Firebase Console -> Authentication -> Settings -> Authorized Domains.";
+    }
 
-    showToast("Sign-in failed: " + (err.message || err), "error");
+    updateCloudStatus("error", "Sign-in failed: " + errorMsg);
+
+    showToast("Sign-in failed: " + errorMsg, "error");
   }
 }
 
