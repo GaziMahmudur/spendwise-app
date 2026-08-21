@@ -634,6 +634,13 @@ let qcatSelectedColor = PRESET_COLORS[0];
 
 // ── INIT ───────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
+  if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+    const installBtn = document.getElementById("nav-install");
+    const downloadBtn = document.getElementById("nav-download-apk");
+    if (installBtn) installBtn.style.display = "none";
+    if (downloadBtn) downloadBtn.style.display = "none";
+  }
+
   loadState();
   if (state.categories.length === 0) {
     state.categories = DEFAULT_CATEGORIES.map((c) => ({ ...c }));
