@@ -472,12 +472,13 @@ class GenericCustomSelect {
     this.dropdown.classList.add("open");
     this.trigger.classList.add("open");
 
-    this.dropdown.style.left = "0";
-    this.dropdown.style.right = "auto";
+    // Default to right-align to perfectly match floating filter buttons
+    this.dropdown.style.right = "0";
+    this.dropdown.style.left = "auto";
     let rect = this.dropdown.getBoundingClientRect();
-    if (rect.right > window.innerWidth) {
-      this.dropdown.style.left = "auto";
-      this.dropdown.style.right = "0";
+    if (rect.left < 0) {
+      this.dropdown.style.right = "auto";
+      this.dropdown.style.left = "0";
     }
 
     document.addEventListener("click", this._closeOnOutside);
@@ -1794,7 +1795,9 @@ function addBalance(event) {
 
   renderAll();
   document.getElementById("balanceForm").reset();
-  document.getElementById("balDate").value = new Date().toISOString().split("T")[0];
+  document.getElementById("balDate").value = new Date()
+    .toISOString()
+    .split("T")[0];
 }
 
 function renderBalanceHistory() {
