@@ -520,7 +520,7 @@ body {
   font-weight: 600;
 }
 
-/* ── Dark dropdown panel ── */
+/* ── Dropdown panel ── */
 .gcs-dropdown {
   display: none;
   position: absolute;
@@ -528,11 +528,11 @@ body {
   right: 0;
   min-width: 200px;
   z-index: 700;
-  background: #1e1b38;
-  border: 1px solid rgba(139, 92, 246, 0.25);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
   border-radius: 18px;
   overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55);
+  box-shadow: var(--shadow-lg);
   animation: gcsIn 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
@@ -559,12 +559,12 @@ body {
   width: 100%;
   padding: 15px 18px;
   border: none;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  border-bottom: 1px solid var(--border);
   background: none;
   font-family: inherit;
   font-size: 15px;
   font-weight: 500;
-  color: #e8e4ff;
+  color: var(--text-primary);
   cursor: pointer;
   text-align: left;
   transition: background var(--transition);
@@ -575,12 +575,12 @@ body {
 }
 
 .gcs-option:hover {
-  background: rgba(139, 92, 246, 0.15);
+  background: var(--primary-xlight);
 }
 
 .gcs-option.selected {
-  background: rgba(109, 40, 217, 0.2);
-  color: #fff;
+  background: var(--primary-xlight);
+  color: var(--primary);
   font-weight: 700;
 }
 
@@ -600,7 +600,7 @@ body {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid var(--border);
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -625,7 +625,7 @@ body {
 .gcs-empty {
   padding: 20px;
   text-align: center;
-  color: rgba(255, 255, 255, 0.45);
+  color: var(--text-muted);
   font-size: 13px;
 }
 
@@ -1350,11 +1350,11 @@ select.form-input option {
   left: 0;
   right: 0;
   z-index: 600;
-  background: #1e1b38;
-  border: 1px solid rgba(139, 92, 246, 0.25);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55);
+  box-shadow: var(--shadow-lg);
   animation: csIn 0.16s cubic-bezier(0.34, 1.56, 0.64, 1);
   max-height: 280px;
   overflow-y: auto;
@@ -1381,14 +1381,14 @@ select.form-input option {
   gap: 12px;
   padding: 13px 16px;
   border: none;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  border-bottom: 1px solid var(--border);
   background: none;
   width: 100%;
   text-align: left;
   font-family: inherit;
   font-size: 14px;
   font-weight: 500;
-  color: #e8e4ff;
+  color: var(--text-primary);
   cursor: pointer;
   transition: background var(--transition);
 }
@@ -1397,11 +1397,11 @@ select.form-input option {
   border-bottom: none;
 }
 .cs-option:hover {
-  background: rgba(139, 92, 246, 0.15);
+  background: var(--primary-xlight);
 }
 .cs-option.selected {
-  background: rgba(109, 40, 217, 0.22);
-  color: #fff;
+  background: var(--primary-xlight);
+  color: var(--primary);
   font-weight: 700;
 }
 
@@ -1427,7 +1427,7 @@ select.form-input option {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid var(--border);
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -1437,9 +1437,9 @@ select.form-input option {
 }
 
 .cs-option.selected .cs-option-check {
-  border-color: #8b5cf6;
-  background: #8b5cf6;
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
+  border-color: var(--primary);
+  background: var(--primary);
+  box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.15);
   font-size: 0;
 }
 

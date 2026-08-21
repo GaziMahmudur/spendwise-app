@@ -66,6 +66,16 @@ class DatePicker {
     this._renderCal();
     this.cal.classList.add("open");
     this.trigger.classList.add("open");
+
+    // adjust position to prevent horizontal overflow
+    this.cal.style.left = "0";
+    this.cal.style.right = "auto";
+    let rect = this.cal.getBoundingClientRect();
+    if (rect.right > window.innerWidth) {
+      this.cal.style.left = "auto";
+      this.cal.style.right = "0";
+    }
+
     document.addEventListener("click", this._closeOnOutside);
   }
   _close() {
@@ -286,6 +296,15 @@ class CustomSelect {
     this._renderOptions();
     this.dropdown.classList.add("open");
     this.trigger.classList.add("open");
+
+    this.dropdown.style.left = "0";
+    this.dropdown.style.right = "auto";
+    let rect = this.dropdown.getBoundingClientRect();
+    if (rect.right > window.innerWidth) {
+      this.dropdown.style.left = "auto";
+      this.dropdown.style.right = "0";
+    }
+
     document.addEventListener("click", this._closeOnOutside);
   }
   _close() {
@@ -452,6 +471,15 @@ class GenericCustomSelect {
     this._renderOptions();
     this.dropdown.classList.add("open");
     this.trigger.classList.add("open");
+
+    this.dropdown.style.left = "0";
+    this.dropdown.style.right = "auto";
+    let rect = this.dropdown.getBoundingClientRect();
+    if (rect.right > window.innerWidth) {
+      this.dropdown.style.left = "auto";
+      this.dropdown.style.right = "0";
+    }
+
     document.addEventListener("click", this._closeOnOutside);
   }
   _close() {
@@ -611,6 +639,7 @@ document.addEventListener("DOMContentLoaded", () => {
     state.categories = DEFAULT_CATEGORIES.map((c) => ({ ...c }));
     saveState();
   }
+  initWalletSelector();
   initDatePickers();
   setTodayDates();
   buildEmojiGrid();
@@ -644,6 +673,21 @@ function fmtCur(n) {
   return sym.length > 2 ? `${num} ${sym}` : `${sym}${num}`;
 }
 // ── QUICK CATEGORY CREATOR ──────────────────────────────
+function getUnusedColor() {
+  const used = state.categories.map((c) => c.color.toLowerCase());
+  const avail = PRESET_COLORS.filter((c) => !used.includes(c.toLowerCase()));
+  if (avail.length > 0) return avail[Math.floor(Math.random() * avail.length)];
+  return (
+    "#" +
+    Math.floor(Math.random() * 16777215)
+      .toString(16)
+      .padStart(6, "0")
+  );
+}
+function selectQcatColor(c) {
+  qcatSelectedColor = c;
+  buildQcatPickers();
+}
 function buildQcatPickers() {
   // Emoji grid inside quick cat panel
   const emojiEl = document.getElementById("qcatEmojis");
@@ -668,21 +712,29 @@ function buildQcatPickers() {
   // Color grid
   const colorEl = document.getElementById("qcatColors");
   if (colorEl) {
-    colorEl.innerHTML = PRESET_COLORS.map(
-      (c) =>
-        `<button type="button" class="qcat-color-btn${
-          c === qcatSelectedColor ? " selected" : ""
-        }" data-c="${c}" style="background:${c};"></button>`,
-    ).join("");
-    colorEl.querySelectorAll(".qcat-color-btn").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        qcatSelectedColor = btn.dataset.c;
-        colorEl
-          .querySelectorAll(".qcat-color-btn")
-          .forEach((b) => b.classList.remove("selected"));
-        btn.classList.add("selected");
+    const used = state.categories.map((c) => c.color.toLowerCase());
+    if (!qcatSelectedColor || used.includes(qcatSelectedColor.toLowerCase()))
+      qcatSelectedColor = getUnusedColor();
+    let html = `<div style="display: flex; flex-wrap: wrap; gap: 8px; width: 100%; align-items: center;">`;
+    html += PRESET_COLORS.map((c) => {
+      const isUsed = used.includes(c.toLowerCase());
+      return `<button type="button" class="qcat-color-btn ${
+        c === qcatSelectedColor ? "selected" : ""
+      } ${
+        isUsed ? "used" : ""
+      }" data-c="${c}" style="background:${c}; border:2px solid transparent; ${
+        isUsed ? "opacity:0.3; cursor:not-allowed;" : ""
+      }" ${isUsed ? "disabled title='Already Used'" : ""}></button>`;
+    }).join("");
+    html += `<div style="display:flex; align-items:center; gap:6px; margin-left: auto;">
+      <input type="color" value="${qcatSelectedColor}" style="width:24px;height:24px;padding:0;border:none;border-radius:4px;cursor:pointer;background:none;" oninput="selectQcatColor(this.value)">
+    </div></div>`;
+    colorEl.innerHTML = html;
+    colorEl
+      .querySelectorAll(".qcat-color-btn:not([disabled])")
+      .forEach((btn) => {
+        btn.addEventListener("click", () => selectQcatColor(btn.dataset.c));
       });
-    });
   }
 }
 
@@ -695,7 +747,7 @@ function toggleQuickCat() {
     document.getElementById("qcatName").value = "";
     document.getElementById("qcatIcon").value = "";
     qcatSelectedEmoji = "";
-    qcatSelectedColor = PRESET_COLORS[0];
+    qcatSelectedColor = getUnusedColor();
     buildQcatPickers();
     setTimeout(() => document.getElementById("qcatName").focus(), 100);
   }
@@ -741,26 +793,95 @@ function saveQuickCategory() {
   showToast(`"${icon} ${name}" created and selected!`, "success");
 }
 
-// ── PERSISTENCE ────────────────────────────────────────
+// ── PERSISTENCE & WALLET MANAGER ───────────────────────
 function loadState() {
   try {
     const raw = localStorage.getItem(STATE_KEY);
-    if (raw) state = JSON.parse(raw);
-  } catch (e) {
-    /* ignore */
+    if (raw) Object.assign(state, JSON.parse(raw));
+  } catch (e) {}
+
+  if (!state.accounts) {
+    state.accounts = {
+      wallet_main: {
+        name: "Main Wallet",
+        expenses: state.expenses || [],
+        balanceRecords: state.balanceRecords || [],
+      },
+    };
+    state.activeAccountId = "wallet_main";
   }
+
+  const activeId = state.activeAccountId || "wallet_main";
+  if (state.accounts[activeId]) {
+    state.expenses = state.accounts[activeId].expenses || [];
+    state.balanceRecords = state.accounts[activeId].balanceRecords || [];
+  }
+
   state.expenses = state.expenses || [];
   state.categories = state.categories || [];
   state.balanceRecords = state.balanceRecords || [];
 }
+
 let _autoBackupTimer = null;
 function saveState() {
+  const activeId = state.activeAccountId || "wallet_main";
+  if (!state.accounts) state.accounts = {};
+  if (!state.accounts[activeId]) state.accounts[activeId] = { name: "Wallet" };
+
+  state.accounts[activeId].expenses = state.expenses;
+  state.accounts[activeId].balanceRecords = state.balanceRecords;
+
   localStorage.setItem(STATE_KEY, JSON.stringify(state));
   if (typeof pushToCloud === "function") {
     clearTimeout(_autoBackupTimer);
     _autoBackupTimer = setTimeout(() => {
       pushToCloud(state, true);
-    }, 1500); // Wait 1.5 seconds after last change before syncing
+    }, 1500);
+  }
+}
+
+function initWalletSelector() {
+  const sel = document.getElementById("walletSelect");
+  if (!sel) return;
+  sel.innerHTML = Object.entries(state.accounts || {})
+    .map(([id, acc]) => `<option value="${id}">${escHtml(acc.name)}</option>`)
+    .join("");
+  sel.value = state.activeAccountId;
+
+  if (typeof gcsRefresh === "function") gcsRefresh("walletSelect");
+}
+
+function switchWallet(id) {
+  if (id === state.activeAccountId || !state.accounts[id]) return;
+  saveState();
+  state.activeAccountId = id;
+  const acc = state.accounts[id];
+  state.expenses = acc.expenses || [];
+  state.balanceRecords = acc.balanceRecords || [];
+
+  initWalletSelector();
+  saveState();
+  renderAll();
+}
+
+function promptNewWallet() {
+  const name = prompt("Enter new wallet/balance name:");
+  if (name && name.trim()) {
+    saveState();
+    const id = "wallet_" + Date.now();
+    state.accounts[id] = {
+      name: name.trim(),
+      expenses: [],
+      balanceRecords: [],
+    };
+    state.activeAccountId = id;
+    state.expenses = [];
+    state.balanceRecords = [];
+
+    initWalletSelector();
+    saveState();
+    renderAll();
+    showToast("Switched to new wallet context!", "success");
   }
 }
 
@@ -972,7 +1093,121 @@ function renderChart() {
   legendEl.style.display = "";
   noData.style.display = "none";
 
-  // ── DPI fix: scale canvas for crisp text on retina/high-DPI screens ──
+  const entries = Object.entries(groups).sort((a, b) => b[1] - a[1]);
+  canvas._entries = entries;
+  canvas._total = total;
+
+  if (!canvas._hasHover) {
+    canvas._hasHover = true;
+    canvas.addEventListener("mousemove", (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+      const cx = 110,
+        cy = 110;
+      const dx = mx - cx,
+        dy = my - cy;
+      const r = Math.sqrt(dx * dx + dy * dy);
+
+      let hoverIdx = -1;
+      if (r >= 55 && r <= 105) {
+        let angle = Math.atan2(dy, dx) + Math.PI / 2;
+        if (angle < 0) angle += Math.PI * 2;
+
+        let curAngle = 0;
+        for (let i = 0; i < canvas._entries.length; i++) {
+          let sweep = (canvas._entries[i][1] / canvas._total) * Math.PI * 2;
+          if (angle >= curAngle && angle <= curAngle + sweep) {
+            hoverIdx = i;
+            break;
+          }
+          curAngle += sweep;
+        }
+      }
+
+      if (canvas._hoverIdx !== hoverIdx) {
+        canvas._hoverIdx = hoverIdx;
+        canvas.style.cursor = hoverIdx !== -1 ? "pointer" : "default";
+        if (!canvas._animating) {
+          canvas._animating = true;
+          requestAnimationFrame(() => animateDonut(canvas));
+        }
+      }
+    });
+
+    canvas.addEventListener("mouseleave", () => {
+      if (canvas._hoverIdx !== -1) {
+        canvas._hoverIdx = -1;
+        canvas.style.cursor = "default";
+        if (!canvas._animating) {
+          canvas._animating = true;
+          requestAnimationFrame(() => animateDonut(canvas));
+        }
+      }
+    });
+  }
+
+  drawDonutCore(canvas, entries, total, -1);
+
+  const colors = entries.map(([id]) => {
+    const cat = state.categories.find((c) => c.id === id);
+    return cat ? cat.color : "#7c3aed";
+  });
+
+  legendEl.innerHTML = entries
+    .slice(0, 6)
+    .map(([id, val], i) => {
+      const cat = state.categories.find((c) => c.id === id);
+      const name = cat ? cat.name : "Other";
+      const pct = ((val / total) * 100).toFixed(1);
+      return `<div class="legend-item" 
+                 onmouseenter="canvas._hoverIdx = ${i}; if(!canvas._animating) { canvas._animating = true; requestAnimationFrame(() => animateDonut(canvas)); }"
+                 onmouseleave="canvas._hoverIdx = -1; if(!canvas._animating) { canvas._animating = true; requestAnimationFrame(() => animateDonut(canvas)); }">
+      <div class="legend-dot" style="background:${colors[i]};"></div>
+      <span class="legend-name">${escHtml(name)}</span>
+      <span class="legend-pct">${pct}%</span>
+    </div>`;
+    })
+    .join("");
+}
+
+function animateDonut(canvas) {
+  let needsUpdate = false;
+  const hoverIdx = canvas._hoverIdx;
+
+  if (!canvas._animStates) canvas._animStates = [];
+  if (canvas._fadeState === undefined) canvas._fadeState = 0;
+
+  const len = canvas._entries ? canvas._entries.length : 0;
+  for (let i = 0; i < len; i++) {
+    const target = i === hoverIdx ? 1 : 0;
+    const current = canvas._animStates[i] || 0;
+    if (Math.abs(target - current) > 0.01) {
+      canvas._animStates[i] = current + (target - current) * 0.15;
+      needsUpdate = true;
+    } else {
+      canvas._animStates[i] = target;
+    }
+  }
+
+  const targetFade = hoverIdx === -1 ? 0 : 1;
+  if (Math.abs(targetFade - canvas._fadeState) > 0.01) {
+    canvas._fadeState += (targetFade - canvas._fadeState) * 0.15;
+    needsUpdate = true;
+  } else {
+    canvas._fadeState = targetFade;
+  }
+
+  drawDonutCore(canvas, canvas._entries, canvas._total, hoverIdx);
+
+  if (needsUpdate) {
+    requestAnimationFrame(() => animateDonut(canvas));
+  } else {
+    canvas._animating = false;
+  }
+}
+
+function drawDonutCore(canvas, entries, total, hoverIdx) {
   const dpr = window.devicePixelRatio || 1;
   const SIZE = 220;
   canvas.width = SIZE * dpr;
@@ -980,18 +1215,14 @@ function renderChart() {
   canvas.style.width = SIZE + "px";
   canvas.style.height = SIZE + "px";
 
-  const entries = Object.entries(groups).sort((a, b) => b[1] - a[1]);
   const ctx = canvas.getContext("2d");
-
-  // Scale all drawing by dpr so logical coords (cx=110 etc.) stay the same
   ctx.scale(dpr, dpr);
 
   const cx = 110,
     cy = 110,
-    outerR = 100,
     innerR = 60;
-
   let startAngle = -Math.PI / 2;
+
   const colors = entries.map(([id]) => {
     const cat = state.categories.find((c) => c.id === id);
     return cat ? cat.color : "#7c3aed";
@@ -999,13 +1230,41 @@ function renderChart() {
 
   entries.forEach(([id, val], i) => {
     const sweep = (val / total) * Math.PI * 2;
+
+    // Smooth interpolation states
+    const popScale = canvas._animStates
+      ? canvas._animStates[i] || 0
+      : hoverIdx === i
+      ? 1
+      : 0;
+    const fadeState =
+      canvas._fadeState !== undefined
+        ? canvas._fadeState
+        : hoverIdx !== -1 && hoverIdx !== i
+        ? 1
+        : 0;
+
+    const outerR = 96 + popScale * 8;
+
     ctx.beginPath();
     ctx.moveTo(cx, cy);
     ctx.arc(cx, cy, outerR, startAngle, startAngle + sweep);
     ctx.arc(cx, cy, innerR, startAngle + sweep, startAngle, true);
     ctx.closePath();
+
+    const sliceAlpha = Math.min(
+      1,
+      Math.max(0, 1 - fadeState * 0.6 + popScale * 0.6 * fadeState),
+    );
+    ctx.globalAlpha = sliceAlpha;
     ctx.fillStyle = colors[i];
     ctx.fill();
+
+    ctx.globalAlpha = 1;
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "#ffffff";
+    ctx.stroke();
+
     startAngle += sweep;
   });
 
@@ -1015,29 +1274,25 @@ function renderChart() {
   ctx.fillStyle = "#ffffff";
   ctx.fill();
 
-  // Center text — sharp because canvas is now dpr-scaled
+  // Center text
   ctx.fillStyle = "#111827";
   ctx.font = `bold 16px 'Hind Siliguri', Inter, sans-serif`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText(fmtAmount(total), cx, cy - 8);
-  ctx.fillStyle = "#6b7280";
-  ctx.font = `11px 'Hind Siliguri', Inter, sans-serif`;
-  ctx.fillText("Total Spent", cx, cy + 12);
 
-  legendEl.innerHTML = entries
-    .slice(0, 6)
-    .map(([id, val], i) => {
-      const cat = state.categories.find((c) => c.id === id);
-      const name = cat ? cat.name : "Other";
-      const pct = ((val / total) * 100).toFixed(1);
-      return `<div class="legend-item">
-      <div class="legend-dot" style="background:${colors[i]};"></div>
-      <span class="legend-name">${escHtml(name)}</span>
-      <span class="legend-pct">${pct}%</span>
-    </div>`;
-    })
-    .join("");
+  if (hoverIdx !== -1 && entries[hoverIdx]) {
+    const val = entries[hoverIdx][1];
+    const cat = state.categories.find((c) => c.id === entries[hoverIdx][0]);
+    ctx.fillText(fmtAmount(val), cx, cy - 8);
+    ctx.fillStyle = colors[hoverIdx];
+    ctx.font = `bold 12px 'Hind Siliguri', Inter, sans-serif`;
+    ctx.fillText(cat ? cat.name : "Other", cx, cy + 12);
+  } else {
+    ctx.fillText(fmtAmount(total), cx, cy - 8);
+    ctx.fillStyle = "#6b7280";
+    ctx.font = `11px 'Hind Siliguri', Inter, sans-serif`;
+    ctx.fillText("Total Spent", cx, cy + 12);
+  }
 }
 
 // ── BAR CHART ──────────────────────────────────────────
@@ -1179,9 +1434,15 @@ function openAddExpenseModal(editId = null) {
   // Re-populate category dropdown (reset() clears it)
   populateCategoryDropdowns();
   modal.classList.add("open");
+  document.body.style.overflow = "hidden";
+  const pc = document.querySelector(".pages-container");
+  if (pc) pc.style.overflow = "hidden";
 }
 function closeAddExpenseModal() {
   document.getElementById("addExpenseModal").classList.remove("open");
+  document.body.style.overflow = "";
+  const pc = document.querySelector(".pages-container");
+  if (pc) pc.style.overflow = "";
   // Also collapse quick-cat panel if open
   const panel = document.getElementById("qcatPanel");
   const togBtn = document.getElementById("qcatToggleBtn");
@@ -1301,12 +1562,29 @@ function buildEmojiGrid() {
 }
 function buildColorGrid() {
   const el = document.getElementById("colorGrid");
-  el.innerHTML = PRESET_COLORS.map(
-    (c) =>
-      `<button type="button" class="color-btn ${
-        c === selectedColor ? "selected" : ""
-      }" style="background:${c};" onclick="selectColor('${c}')"></button>`,
-  ).join("");
+  if (!el) return;
+  const used = state.categories.map((c) => c.color.toLowerCase());
+  if (!selectedColor || used.includes(selectedColor.toLowerCase()))
+    selectedColor = getUnusedColor();
+
+  let html = `<div style="display: flex; flex-wrap: wrap; gap: 10px; width: 100%; align-items: center;">`;
+  html += PRESET_COLORS.map((c) => {
+    const isUsed = used.includes(c.toLowerCase());
+    return `<button type="button" class="color-btn ${
+      c === selectedColor ? "selected" : ""
+    } ${
+      isUsed ? "used" : ""
+    }" style="background:${c}; border: 2px solid transparent; ${
+      isUsed ? "opacity:0.3; cursor:not-allowed;" : ""
+    }" ${
+      isUsed ? "disabled title='Already Used'" : `onclick="selectColor('${c}')"`
+    }></button>`;
+  }).join("");
+  html += `<div style="display:flex; align-items:center; gap:6px; margin-left: 8px;">
+    <input type="color" value="${selectedColor}" style="width:28px;height:28px;padding:0;border:none;border-radius:4px;cursor:pointer;background:none;" oninput="selectColor(this.value)">
+    <span style="font-size:12px;color:var(--text-muted);">Custom</span>
+  </div></div>`;
+  el.innerHTML = html;
 }
 function selectEmoji(e) {
   selectedEmoji = e;
@@ -1318,10 +1596,7 @@ function selectEmoji(e) {
 }
 function selectColor(c) {
   selectedColor = c;
-  document
-    .querySelectorAll(".color-btn")
-    .forEach((b) => b.classList.remove("selected"));
-  event.currentTarget.classList.add("selected");
+  buildColorGrid();
 }
 
 function addCategory(event) {
@@ -1336,6 +1611,8 @@ function addCategory(event) {
   renderAll();
   document.getElementById("categoryForm").reset();
   selectedEmoji = "";
+  selectedColor = getUnusedColor();
+  buildColorGrid();
   document
     .querySelectorAll(".emoji-btn")
     .forEach((b) => b.classList.remove("selected"));
@@ -1404,19 +1681,51 @@ function addBalance(event) {
 
   if (!amount || !date) return;
 
-  state.balanceRecords.push({
-    id: uid(),
-    amount,
-    date,
-    note,
-    type,
-    createdAt: new Date().toISOString(),
-  });
-  saveState();
+  if (type === "set") {
+    // Create a brand new wallet tracking profile
+    saveState();
+    const id = "wallet_" + Date.now();
+    const walletName = note || `Balance Profile (${fmtDate(date)})`;
+    state.accounts[id] = {
+      name: walletName,
+      expenses: [],
+      balanceRecords: [],
+    };
+
+    // Auto-switch to newly created wallet
+    state.activeAccountId = id;
+    state.expenses = [];
+    state.balanceRecords = [];
+
+    // Push the initial deposit
+    state.balanceRecords.push({
+      id: uid(),
+      amount,
+      date,
+      note: "Initial Balance Setup",
+      type: "add", // normalizes calculation logic
+      createdAt: new Date().toISOString(),
+    });
+
+    initWalletSelector();
+    saveState();
+    showToast("New balance profile created successfully!", "success");
+  } else {
+    state.balanceRecords.push({
+      id: uid(),
+      amount,
+      date,
+      note,
+      type,
+      createdAt: new Date().toISOString(),
+    });
+    saveState();
+    showToast("Balance added to current profile!", "success");
+  }
+
   renderAll();
   document.getElementById("balanceForm").reset();
   dpSetValue("balDate", new Date().toISOString().split("T")[0]);
-  showToast("Balance record saved!", "success");
 }
 
 function renderBalanceHistory() {
