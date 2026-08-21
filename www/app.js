@@ -296,8 +296,6 @@ class CustomSelect {
     this._renderOptions();
     this.dropdown.classList.add("open");
     this.trigger.classList.add("open");
-    this.wrap.classList.add("open-level");
-    document.body.classList.add("dropdown-open");
 
     this.dropdown.style.left = "0";
     this.dropdown.style.right = "auto";
@@ -312,12 +310,6 @@ class CustomSelect {
   _close() {
     this.dropdown.classList.remove("open");
     this.trigger.classList.remove("open");
-    this.wrap.classList.remove("open-level");
-
-    // Check if no other dropdowns are open before removing body blur
-    if (!document.querySelector(".cs-dropdown.open, .gcs-dropdown.open")) {
-      document.body.classList.remove("dropdown-open");
-    }
     document.removeEventListener("click", this._closeOnOutside);
   }
   _closeOnOutside(e) {
@@ -479,8 +471,6 @@ class GenericCustomSelect {
     this._renderOptions();
     this.dropdown.classList.add("open");
     this.trigger.classList.add("open");
-    this.wrap.classList.add("open-level");
-    document.body.classList.add("dropdown-open");
 
     this.dropdown.style.left = "0";
     this.dropdown.style.right = "auto";
@@ -495,11 +485,6 @@ class GenericCustomSelect {
   _close() {
     this.dropdown.classList.remove("open");
     this.trigger.classList.remove("open");
-    this.wrap.classList.remove("open-level");
-
-    if (!document.querySelector(".cs-dropdown.open, .gcs-dropdown.open")) {
-      document.body.classList.remove("dropdown-open");
-    }
     document.removeEventListener("click", this._closeOnOutside);
   }
   _closeOnOutside(e) {
@@ -1643,28 +1628,6 @@ function selectColor(c) {
   buildColorGrid();
 }
 
-let editingCategoryId = null;
-function editCategory(id) {
-  const cat = state.categories.find((c) => c.id === id);
-  if (!cat) return;
-  editingCategoryId = id;
-  document.getElementById("catName").value = cat.name;
-
-  if (PRESET_EMOJIS.includes(cat.icon)) {
-    selectEmoji(cat.icon);
-    document.getElementById("catIcon").value = "";
-  } else {
-    document.getElementById("catIcon").value = cat.icon;
-    selectEmoji("");
-  }
-
-  selectedColor = cat.color;
-  buildColorGrid();
-  document.querySelector("#categoryForm button[type='submit']").textContent =
-    "Save Changes";
-  document.getElementById("catName").focus();
-}
-
 function addCategory(event) {
   event.preventDefault();
   const name = document.getElementById("catName").value.trim();
@@ -1672,38 +1635,7 @@ function addCategory(event) {
     document.getElementById("catIcon").value.trim() || selectedEmoji || "🏷️";
   if (!name) return;
 
-  const lcColor = selectedColor.toLowerCase();
-
-  if (editingCategoryId) {
-    const isUsedByOther = state.categories.some(
-      (c) => c.id !== editingCategoryId && c.color.toLowerCase() === lcColor,
-    );
-    if (isUsedByOther) {
-      showToast("This color is already taken by another category!", "error");
-      return;
-    }
-    const cat = state.categories.find((c) => c.id === editingCategoryId);
-    if (cat) {
-      cat.name = name;
-      cat.icon = icon;
-      cat.color = selectedColor;
-    }
-    editingCategoryId = null;
-    document.querySelector("#categoryForm button[type='submit']").textContent =
-      "Create Category";
-    showToast(`Category updated!`, "success");
-  } else {
-    const isUsed = state.categories.some(
-      (c) => c.color.toLowerCase() === lcColor,
-    );
-    if (isUsed) {
-      showToast("This color is already taken!", "error");
-      return;
-    }
-    state.categories.push({ id: uid(), name, icon, color: selectedColor });
-    showToast(`Category "${name}" created!`, "success");
-  }
-
+  state.categories.push({ id: uid(), name, icon, color: selectedColor });
   saveState();
   renderAll();
   document.getElementById("categoryForm").reset();
@@ -1713,6 +1645,7 @@ function addCategory(event) {
   document
     .querySelectorAll(".emoji-btn")
     .forEach((b) => b.classList.remove("selected"));
+  showToast(`Category "${name}" created!`, "success");
 }
 
 function renderCategories() {
@@ -1731,13 +1664,10 @@ function renderCategories() {
         .reduce((s, e) => s + Number(e.amount), 0);
       return `<div class="cat-card" style="background:${
         cat.color
-      }18; border-color:${cat.color}44; position:relative;">
+      }18; border-color:${cat.color}44;">
       <button class="cat-delete" onclick="promptDeleteCategory('${
         cat.id
-      }')" title="Delete" style="position:absolute; top:8px; right:8px;">🗑️</button>
-      <button class="cat-edit" onclick="editCategory('${
-        cat.id
-      }')" title="Edit" style="position:absolute; top:8px; right:36px; background:none; border:none; cursor:pointer; font-size:16px;">✏️</button>
+      }')" title="Delete">🗑️</button>
       <div class="cat-icon">${cat.icon}</div>
       <div class="cat-name" style="color:${cat.color}">${escHtml(
         cat.name,
