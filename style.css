@@ -950,7 +950,7 @@ body {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  border: 3px solid transparent;
+
   cursor: pointer;
   transition: all var(--transition);
   outline: 2px solid transparent;
