@@ -310,7 +310,6 @@ body {
   }
 }
 
-/* ── CARD ── */
 .glass-card {
   background: var(--bg-surface);
   border: 1px solid var(--border);
@@ -2047,6 +2046,9 @@ input[type="number"]::-webkit-inner-spin-button {
   width: 100%;
   max-width: 480px;
   box-shadow: var(--shadow-lg);
+  overscroll-behavior: contain;
+  overflow-y: auto;
+  max-height: 90vh;
   animation: modalIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
@@ -3048,4 +3050,25 @@ input[type="number"]::-webkit-inner-spin-button {
     max-width: 30%;
     text-align: right;
   }
+}
+ 
+/* Background blur when dropdown open */
+body.dropdown-open::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0,0,0,0.25);
+  backdrop-filter: blur(2px);
+  pointer-events: none;
+  animation: modalIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.gcs-wrap.open-level, .cs-wrap.open-level {
+  z-index: 101 !important;
+}
+ 
+.gcs-dropdown, .cs-dropdown {
+  max-height: 250px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
