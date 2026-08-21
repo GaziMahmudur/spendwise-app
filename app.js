@@ -647,9 +647,9 @@ document.addEventListener("DOMContentLoaded", () => {
     saveState();
   }
   initWalletSelector();
-  initDatePickers();
   setTodayDates();
   buildEmojiGrid();
+  buildColorGrid();
   buildColorGrid();
   buildQcatPickers();
   updateSidebarDate();
@@ -1482,7 +1482,7 @@ function saveExpense(event) {
   const editId = document.getElementById("expenseEditId").value;
   const desc = document.getElementById("expDesc").value.trim();
   const amount = parseFloat(document.getElementById("expAmount").value);
-  const date = dpGetValue("expDate");
+  const date = document.getElementById("expDate").value;
   const catId = csGetValue("expCategory");
   const note = document.getElementById("expNote").value.trim();
 
@@ -1628,6 +1628,8 @@ function selectColor(c) {
   buildColorGrid();
 }
 
+let editingCategoryId = null;
+
 function addCategory(event) {
   event.preventDefault();
   const name = document.getElementById("catName").value.trim();
@@ -1635,7 +1637,22 @@ function addCategory(event) {
     document.getElementById("catIcon").value.trim() || selectedEmoji || "🏷️";
   if (!name) return;
 
-  state.categories.push({ id: uid(), name, icon, color: selectedColor });
+  if (editingCategoryId) {
+    const cat = state.categories.find((c) => c.id === editingCategoryId);
+    if (cat) {
+      cat.name = name;
+      cat.icon = icon;
+      cat.color = selectedColor;
+    }
+    editingCategoryId = null;
+    document.querySelector("#categoryForm button[type='submit']").textContent =
+      "Create Category";
+    showToast(`Category updated successfully!`, "success");
+  } else {
+    state.categories.push({ id: uid(), name, icon, color: selectedColor });
+    showToast(`Category "${name}" created!`, "success");
+  }
+
   saveState();
   renderAll();
   document.getElementById("categoryForm").reset();
@@ -1645,7 +1662,27 @@ function addCategory(event) {
   document
     .querySelectorAll(".emoji-btn")
     .forEach((b) => b.classList.remove("selected"));
-  showToast(`Category "${name}" created!`, "success");
+}
+
+function editCategory(id) {
+  const cat = state.categories.find((c) => c.id === id);
+  if (!cat) return;
+  editingCategoryId = id;
+
+  document.getElementById("catName").value = cat.name;
+  selectEmoji(cat.icon);
+
+  // Try selecting the color to re-sync
+  selectedColor = cat.color;
+  buildColorGrid();
+
+  document.querySelector("#categoryForm button[type='submit']").textContent =
+    "Save Changes";
+
+  // Scroll to form nicely
+  document
+    .getElementById("categoryForm")
+    .scrollIntoView({ behavior: "smooth" });
 }
 
 function renderCategories() {
@@ -1664,10 +1701,13 @@ function renderCategories() {
         .reduce((s, e) => s + Number(e.amount), 0);
       return `<div class="cat-card" style="background:${
         cat.color
-      }18; border-color:${cat.color}44;">
+      }18; border-color:${cat.color}44; position:relative;">
       <button class="cat-delete" onclick="promptDeleteCategory('${
         cat.id
-      }')" title="Delete">🗑️</button>
+      }')" title="Delete" style="position:absolute; top:8px; right:8px;">🗑️</button>
+      <button class="cat-edit" onclick="editCategory('${
+        cat.id
+      }')" title="Edit" style="position:absolute; top:8px; right:36px; background:none; border:none; cursor:pointer; font-size:16px;">✏️</button>
       <div class="cat-icon">${cat.icon}</div>
       <div class="cat-name" style="color:${cat.color}">${escHtml(
         cat.name,
@@ -1704,7 +1744,7 @@ function populateCategoryDropdowns() {
 function addBalance(event) {
   event.preventDefault();
   const amount = parseFloat(document.getElementById("balAmount").value);
-  const date = dpGetValue("balDate");
+  const date = document.getElementById("balDate").value;
   const note = document.getElementById("balNote").value.trim();
   const type = document.querySelector('input[name="balType"]:checked').value;
 
@@ -1754,7 +1794,7 @@ function addBalance(event) {
 
   renderAll();
   document.getElementById("balanceForm").reset();
-  dpSetValue("balDate", new Date().toISOString().split("T")[0]);
+  document.getElementById("balDate").value = new Date().toISOString().split("T")[0];
 }
 
 function renderBalanceHistory() {
