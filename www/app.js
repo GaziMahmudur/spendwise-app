@@ -742,7 +742,7 @@ function buildQcatPickers() {
     }).join("");
 
     // Beautiful color wheel icon wrapper
-    html += `<div style="display:flex; align-items:center; margin-left: auto;">
+    html += `<div style="display:flex; align-items:center;">
       <label class="qcat-color-btn" style="background: conic-gradient(red, yellow, lime, aqua, blue, magenta, red); position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; cursor: pointer; width: 32px; height: 32px;" title="Custom Color">
         <input type="color" value="${qcatSelectedColor}" style="opacity:0; position:absolute; width:100%; height:100%; cursor:pointer;" onchange="selectQcatColor(this.value)">
         <span style="display:block; width:14px; height:14px; background:#fff; border-radius:50%; box-shadow:0 1px 3px rgba(0,0,0,0.3); pointer-events:none;"></span>
@@ -1601,7 +1601,7 @@ function buildColorGrid() {
       isUsed ? "disabled title='Already Used'" : `onclick="selectColor('${c}')"`
     }></button>`;
   }).join("");
-  html += `<div style="display:flex; align-items:center; gap:6px; margin-left: auto;">
+  html += `<div style="display:flex; align-items:center; gap:6px;">
     <label class="color-btn" style="background: conic-gradient(red, yellow, lime, aqua, blue, magenta, red); position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; cursor: pointer; width: 32px; height: 32px;" title="Custom Color">
       <input type="color" value="${selectedColor}" style="opacity:0; position:absolute; width:100%; height:100%; cursor:pointer;" onchange="selectColor(this.value)">
       <span style="display:block; width:14px; height:14px; background:#fff; border-radius:50%; box-shadow:0 1px 3px rgba(0,0,0,0.3); pointer-events:none;"></span>
