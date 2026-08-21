@@ -88,8 +88,20 @@ body {
   background: #d1d5db;
   border-radius: 99px;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: var(--primary-light);
+
+/* Invisible inner scrollbars for clean UI components */
+.gcs-dropdown::-webkit-scrollbar,
+.cs-dropdown::-webkit-scrollbar,
+.history-table-wrapper::-webkit-scrollbar,
+.sidebar-nav::-webkit-scrollbar {
+  display: none !important;
+}
+.gcs-dropdown,
+.cs-dropdown,
+.history-table-wrapper,
+.sidebar-nav {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
 }
 
 /* ═══════════════════════════════════════════
